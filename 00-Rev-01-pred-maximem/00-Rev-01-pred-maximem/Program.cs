@@ -48,15 +48,18 @@ namespace _00_Rev_01_pred_maximem
                 }
                 else
                 {
+                    int lol = int.Parse(x);
+                    
                     try
                     {
-                        if (biggest < int.Parse(x))
+                        
+                        if (biggest < lol)
                         {
                             before = last_num;
-                            biggest = int.Parse(x);
+                            biggest = lol;
                             
                         }
-                        last_num = int.Parse(x);
+                        last_num = lol;
 
 
 
