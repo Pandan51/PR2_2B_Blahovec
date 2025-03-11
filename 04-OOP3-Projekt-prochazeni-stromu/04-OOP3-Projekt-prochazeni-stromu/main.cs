@@ -149,9 +149,15 @@ class Program
                         Console.WriteLine("Už jsme na pozici");
                         Console.ReadKey();
                     }
+                    //Pøejít na šéfa
                     else if(count == -3)
                     {
                         current = boss;
+                    }
+                    //Pøepnutí na mód seznam
+                    else if(count == -4)
+                    {
+                        Console.WriteLine("Seznam akce");
                     }
                     else
                     {
