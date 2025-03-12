@@ -67,6 +67,7 @@ class Salesman
         {
             Salesman salesman = item.ToSalesman();
             treeData[salesman.ID] = salesman;
+            // TODO IF marked then add to Progam.Marked
 
             if (item.ParentId != 0)
                 treeData[item.ParentId].AddSubordinate(salesman);
@@ -77,6 +78,11 @@ class Salesman
         return root;
     }
 
+    public static void SaveTree(Salesman root)
+    {
+        // CONVERT TO List<SalesmanData> AND THE SAVE
+    }
+
     private class SalesmanData
     {
         public int ID { get; set; }
@@ -84,6 +90,7 @@ class Salesman
         public string Surname { get; set; }
         public int Sales { get; set; }
         public int ParentId { get; set; }
+        // TODO bool isBookmark
 
         public SalesmanData() { }
 
@@ -94,6 +101,7 @@ class Salesman
             Surname = salesman.Surname;
             Sales = salesman.Sales;
             ParentId = parentId;
+            // bool
         }
 
         public Salesman ToSalesman() => new Salesman(Surname, Name, Sales, ID);

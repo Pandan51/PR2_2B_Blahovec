@@ -18,7 +18,16 @@ namespace main
                 FindSalesmanRecursive(subordinate, surname);
             }
         }
+        public static bool FindMarkedInList(List<Salesman> markedList, Salesman target)
+        {
+            foreach(Salesman x in markedList)
+            {
+                if (x == target)
+                    return true;
 
+            }
+            return false;
+        }
 
         public static Salesman FindUpperSalesman(Salesman target, Salesman root)
         {
@@ -30,7 +39,7 @@ namespace main
             }
             foreach (var employee in root.Subordinates)
             {
-                if (employee.Name == target.Name && employee.Surname == target.Surname)
+                if (employee == target)
                 {
                     //Console.WriteLine($"Našli jsme cíl {target.Name}");
                     return root;
