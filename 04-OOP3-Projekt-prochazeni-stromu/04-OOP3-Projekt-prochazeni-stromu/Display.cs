@@ -60,7 +60,8 @@ namespace main
             DisplayPopUpMenu(Find.FindMarkedInList(markedList, current));
             
 
-            Console.Write($"Příme prodeje: {current.Sales} $");
+            Console.WriteLine($"Příme prodeje: {current.Sales} $");
+            Console.Write($"Celkové prodeje sítě: {Find.GetTotalSalesRecursive(current)} $");
             Console.Write($"{pozice}");
             if (selectedIndex == -1)
             {

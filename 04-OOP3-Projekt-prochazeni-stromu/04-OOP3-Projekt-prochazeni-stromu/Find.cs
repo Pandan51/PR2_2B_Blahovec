@@ -116,7 +116,7 @@ namespace main
             return total;
         }
 
-        static int GetTotalSalesRecursive(Salesman parentNode)
+        public static int GetTotalSalesRecursive(Salesman parentNode)
         {
             int sum = 0;
             sum += parentNode.Sales;
@@ -148,5 +148,7 @@ namespace main
             }
             return found.ToArray();
         }
+
+        
     }
 }

@@ -1,6 +1,10 @@
+using main;
 using System;
 using System.Collections.Generic;
+using System.IO.Enumeration;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json;
+using System.Xml.Linq;
 
 class Salesman
 {
@@ -39,7 +43,7 @@ class Salesman
         Surname = surname;
         Sales = sales;
         Subordinates = new List<Salesman>();
-        //Manager = Manager;
+        
     }
 
     public void AddSubordinate(Salesman subordinate)
@@ -47,14 +51,7 @@ class Salesman
         Subordinates.Add(subordinate);
     }
 
-    //public void AssignManagers(Salesman parentNode)
-    //{
-    //    foreach (var subordinate in parentNode.Subordinates)
-    //    {
-    //        subordinate.Manager = parentNode; // Assign the manager before going deeper
-    //        AssignManagers(subordinate); // Recursively process the next level
-    //    }
-    //}
+    
 
     public static Salesman DeserializeTree(string jsonString)
     {
@@ -78,12 +75,147 @@ class Salesman
         return root;
     }
 
-    public static void SaveTree(Salesman root)
+    public static void SaveList(List<Salesman> markedSalesmen, string filename)
     {
-        // CONVERT TO List<SalesmanData> AND THE SAVE
+
+        if (File.Exists(filename)) // Check if the file exists
+        {
+            Console.WriteLine($"Varování: Tento soubor '{filename}' už existuje.");
+            Console.WriteLine("Chcete soubour pøepsat? (ano)");
+            string response = Console.ReadLine()?.Trim().ToLower();
+
+            if (response != "ano")
+            {
+                Console.WriteLine("Ukládání pøerušeno");
+                return; // Exit without saving
+            }
+        }
+
+        //List id
+        List<int> markedSalesmenIDs = new List<int>();
+
+        //Naètení id oznaèených
+        foreach(Salesman x in markedSalesmen)
+        {
+            markedSalesmenIDs.Add(x.ID);
+        }
+
+        
+        using (StreamWriter writer = new StreamWriter(filename))
+            //Zapsání id do souboru
+        {
+            foreach (int id in markedSalesmenIDs)
+            {
+                writer.WriteLine(id);
+            }
+        }
     }
 
-    private class SalesmanData
+    public static List<Salesman> LoadList(string filename, Salesman root)
+    {
+        filename = NameFile();
+        List<int> selectedEmployeeIDs = new List<int>();
+        List<Salesman> markedEmployees = new List<Salesman>();
+
+        if (File.Exists(filename)) // Check if the file exists
+        {
+            foreach (string line in File.ReadAllLines(filename))
+            {
+                if (int.TryParse(line, out int id)) // Convert to int safely
+                {
+                    selectedEmployeeIDs.Add(id);
+                }
+            }
+            markedEmployees = FindIDTraverseTree(root, selectedEmployeeIDs, markedEmployees);
+        }
+
+        return markedEmployees;
+    }
+
+    private static List<Salesman> FindIDTraverseTree(Salesman root, List<int> markedIDs, List<Salesman> markedList)
+    {
+        if (root == null)
+            return markedList;
+            if (markedIDs.Contains(root.ID))
+                markedList.Add(root);
+
+            foreach (var subordinate in root.Subordinates)
+            {
+                FindIDTraverseTree(subordinate, markedIDs, markedList);
+            }
+        
+        return markedList;
+    }
+    
+
+    public static string CreateList(string filename = "muj_vyber.txt", string defaultContent = "")
+    {
+        filename = NameFile();
+        string response = "";
+        //Console.WriteLine("Pojmenujte seznam, jinak se bude jmenovat muj_vyber");
+        //string response = Console.ReadLine()?.Trim();
+        //if(response != null && response != "")
+        //{
+        //    filename = response+".txt";
+        //    Console.WriteLine("Vytvoøeno");
+        //}
+        
+        bool overwrite = false;
+        do
+        {
+            
+            if (!File.Exists(filename))  // Check if the file already exists
+            {
+                File.WriteAllText(filename,defaultContent);
+
+                Console.WriteLine($"Soubor '{filename}' vytvoøen.");
+            }
+            else if(overwrite)
+            {
+                File.WriteAllText(filename, defaultContent);
+                Console.WriteLine($"Soubor '{filename}' vytvoøen.");
+            }
+            else
+            {
+                overwrite = false;
+                Console.WriteLine($"Soubor '{filename}' už existuje. Chcete ho pøepsat? (ano)");
+
+                response = Console.ReadLine()?.Trim().ToLower();
+
+                if (response == "ano")
+                {
+                    
+                    overwrite = true;
+                    continue;
+                    
+                }
+                else
+                {
+                    Console.WriteLine("Ukládání pøerušeno");
+                }
+
+            }
+        } while (false);
+
+        return filename;
+    }
+
+    private static string NameFile()
+    {
+        string filename = "muj_vyber.txt";
+        Console.WriteLine("Pojmenujte seznam, jinak se bude jmenovat muj_vyber");
+        string response = Console.ReadLine()?.Trim();
+        if (response != null && response != "")
+        {
+            filename = response + ".txt";
+            Console.WriteLine("Vytvoøeno");
+        }
+        FileManagement.currentListName = filename;
+        return filename;
+    }
+
+
+private class SalesmanData
     {
         public int ID { get; set; }
         public string Name { get; set; }

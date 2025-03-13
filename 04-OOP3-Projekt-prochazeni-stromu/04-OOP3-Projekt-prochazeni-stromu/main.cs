@@ -28,6 +28,9 @@ class Program
         //string filename = "smalltree.json";
         string filename = "largetree.json";
 
+
+        //string markedListName = null;
+
         // TODO INIT MARKED
         Salesman boss = Salesman.DeserializeTree(File.ReadAllText(filename));
         Salesman current = boss;
@@ -43,6 +46,7 @@ class Program
         
 
         Display.DisplaySalesmenTree(boss);
+
 
 
         int count = -1;
@@ -201,7 +205,11 @@ class Program
                 Console.Write("Pøejít na prohlížeè\n");
                 Display.ForegroundColor("reset");
 
-                foreach(Salesman x in marked)
+                Console.WriteLine("- - - - - - - - - - - - - - - - - - - - - - -");
+                Console.WriteLine($"Seznam: {FileManagement.currentListName}");
+                Console.WriteLine("- - - - - - - - -");
+
+                foreach (Salesman x in marked)
                 {
                     
                     Console.WriteLine(x.Name+" "+x.Surname);
@@ -234,6 +242,21 @@ class Program
                         {
                             count = -4;
                             displayMode = true;
+                        }
+                        else if(count == -7)
+                        {
+                            if(FileManagement.currentListName != null)
+                                Salesman.SaveList(marked, FileManagement.currentListName);
+                        }
+                        else if(count == -6)
+                        {
+                            
+                            marked = Salesman.LoadList(FileManagement.currentListName, boss);
+                        }
+                        else if (count == -5)
+                        {
+
+                            FileManagement.currentListName = Salesman.CreateList();
                         }
                         break;
 
