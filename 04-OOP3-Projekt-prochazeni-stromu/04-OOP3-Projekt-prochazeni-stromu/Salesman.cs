@@ -113,12 +113,13 @@ class Salesman
 
     public static List<Salesman> LoadList(string filename, Salesman root)
     {
-        filename = NameFile();
+        filename = NameFile(true);
         List<int> selectedEmployeeIDs = new List<int>();
         List<Salesman> markedEmployees = new List<Salesman>();
 
         if (File.Exists(filename)) // Check if the file exists
         {
+            FileManagement.ListIsLoaded();
             foreach (string line in File.ReadAllLines(filename))
             {
                 if (int.TryParse(line, out int id)) // Convert to int safely
@@ -150,7 +151,7 @@ class Salesman
 
     public static string CreateList(string filename = "muj_vyber.txt", string defaultContent = "")
     {
-        filename = NameFile();
+        filename = NameFile(false);
         string response = "";
         //Console.WriteLine("Pojmenujte seznam, jinak se bude jmenovat muj_vyber");
         //string response = Console.ReadLine()?.Trim();
@@ -169,11 +170,13 @@ class Salesman
                 File.WriteAllText(filename,defaultContent);
 
                 Console.WriteLine($"Soubor '{filename}' vytvoøen.");
+                FileManagement.ListIsLoaded();
             }
             else if(overwrite)
             {
                 File.WriteAllText(filename, defaultContent);
                 Console.WriteLine($"Soubor '{filename}' vytvoøen.");
+                FileManagement.ListIsLoaded();
             }
             else
             {
@@ -200,10 +203,13 @@ class Salesman
         return filename;
     }
 
-    private static string NameFile()
+    private static string NameFile(bool pathway)
     {
         string filename = "muj_vyber.txt";
-        Console.WriteLine("Pojmenujte seznam, jinak se bude jmenovat muj_vyber");
+        if (pathway == false)
+            Console.WriteLine("Pojmenujte seznam, jinak se bude jmenovat muj_vyber");
+        else
+            Console.WriteLine("Napište název souboru, který hledáte");
         string response = Console.ReadLine()?.Trim();
         if (response != null && response != "")
         {

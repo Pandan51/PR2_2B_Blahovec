@@ -56,18 +56,16 @@ class Program
             var key = ConsoleKey.RightArrow;
             if (displayMode == true)
             {
-                //Pokus o metody
-                //Display.LoopCase(current, boss, count, menuBool, marked, displayMode);
+                
 
                 #region Prohlizec
                 Console.Clear();
                 Console.WriteLine();
                 //Console.Clear();
-                Display.DisplaySalesman(current, boss, count/*, menuBool*/, marked);
+                Display.DisplaySalesman(current, boss, count, marked);
 
 
-                //Console.WriteLine("U for up, D for down");
-                //Console.WriteLine("Up arrow to move up, down arrow to move down");
+                
                 key = Console.ReadKey(true).Key;
                 //char key = Char.ToUpper(Console.ReadKey().KeyChar);
                 Console.WriteLine();
@@ -77,7 +75,7 @@ class Program
 
                     case ConsoleKey.UpArrow:
                         // Move to the superior (previous subordinate)
-                        if (count >= -3)
+                        if (count >= -2)
                         {
                             count--; // Go up (previous subordinate)
                         }
@@ -104,10 +102,6 @@ class Program
                         {
                             count--;
                         }
-                        //else if (count > -3)
-                        //{
-                        //    menuBool = true;
-                        //}
                         break;
                     case ConsoleKey.DownArrow:
                         // Move to the next subordinate
@@ -165,7 +159,10 @@ class Program
                         }
                         break;
                     case ConsoleKey.Spacebar:
-                        marked = MarkSalesman(marked, current);
+                        if (FileManagement.isListLoaded)
+                            marked = MarkSalesman(marked, current);
+                        else
+                            FileManagement.ListNotLoadedWarning();
 
                         break;
 
@@ -209,44 +206,59 @@ class Program
                 Console.WriteLine($"Seznam: {FileManagement.currentListName}");
                 Console.WriteLine("- - - - - - - - -");
 
-                foreach (Salesman x in marked)
+                //foreach (Salesman x in marked)
+                //{
+
+                //    Console.WriteLine(x.Name+" "+x.Surname);
+                //}
+
+                for (int i = 0; i < marked.Count; i++)
                 {
-                    
-                    Console.WriteLine(x.Name+" "+x.Surname);
+                    if(count == i)
+                    {
+                        Display.HighlightedColouring();
+                        Console.WriteLine($"{marked[i].Name} {marked[i].Surname}");
+                        Console.ResetColor();
+                    }
+                    else
+                    {
+                        Console.WriteLine($"{marked[i].Name} {marked[i].Surname}");
+                    }
                 }
 
 
-                //Input
-                key = Console.ReadKey(true).Key;
+                    //Input
+                    key = Console.ReadKey(true).Key;
                 switch (key)
                 {
                     case ConsoleKey.LeftArrow:
                         if (count < -5)
                         {
                             count++;
-                            //Console.WriteLine("Akce pøepnutí na prohlížeè");
-                            //Console.ReadKey();
-                            //displayMode = true;
                         }
-                        else
-                        {
-                            count++;
-                        }
+                        
                     break;
                     case ConsoleKey.RightArrow:
-                        if(count > -8)
+                        if(count > -8 && count < 0)
                             count--;
                     break;
                     case ConsoleKey.Enter:
                         if(count == -8)
                         {
-                            count = -4;
+                            count = -2;
                             displayMode = true;
                         }
                         else if(count == -7)
                         {
-                            if(FileManagement.currentListName != null)
-                                Salesman.SaveList(marked, FileManagement.currentListName);
+                            if (FileManagement.isListLoaded)
+                            {
+                                if (FileManagement.currentListName != null)
+                                    Salesman.SaveList(marked, FileManagement.currentListName);
+                            }
+                            else
+                            {
+                                FileManagement.ListNotLoadedWarning();
+                            }
                         }
                         else if(count == -6)
                         {
@@ -255,10 +267,46 @@ class Program
                         }
                         else if (count == -5)
                         {
-
                             FileManagement.currentListName = Salesman.CreateList();
+                            marked.Clear();
+                        }
+                        if(count >= 0)
+                        {
+                            displayMode = true;
+                            current = marked[count];
+                            count = -2;
                         }
                         break;
+                    case ConsoleKey.DownArrow:
+                        if (FileManagement.isListLoaded != false)
+                        {
+                            if (count < -4 && count > -9)
+                            {
+                                count = 0;
+                            }
+                            else if (count < marked.Count - 1)
+                            {
+                                count++;
+                            }
+                        }
+                        else
+                        {
+                            FileManagement.ListNotLoadedWarning();
+                        }
+                            break;
+                        
+                    case ConsoleKey.UpArrow:
+                        if(count == 0)
+                        {
+                            count = -5;
+                        }
+                        else if (count > -5)
+                        {
+                            count--;
+                        }
+                        break;
+                        
+                    
 
 
                         #endregion

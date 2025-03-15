@@ -144,6 +144,10 @@ namespace main
             {
                 Console.ForegroundColor = ConsoleColor.DarkBlue;
             }
+            if(color == "red")
+            {
+                Console.ForegroundColor = ConsoleColor.Red;
+            }
             else if(color == "reset")
             {
                 Console.ResetColor();
