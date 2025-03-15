@@ -10,7 +10,7 @@ namespace main
     static class Display
     {
         
-        public static void DisplaySalesman(Salesman current, Salesman boss, int selectedIndex/*, bool popUpMenu*/, List<Salesman> markedList)
+        public static void DisplaySalesman(Salesman current, Salesman boss, int selectedIndex, List<Salesman> markedList)
         {
             #region Menu
             ForegroundColor("dblue");
@@ -75,17 +75,6 @@ namespace main
             {
                 Console.ResetColor();
             }
-            //Menu
-
-
-            //if (popUpMenu == true && selectedIndex == -1 && manager != null)
-            //{
-            //    //DisplayPopUpMenu(Find.FindMarkedInList(markedList, manager));
-            //}
-            //else
-            //{
-            //    Console.WriteLine();
-            //}
 
             Console.WriteLine();
             Console.Write($"Podřízení: ");
@@ -110,11 +99,6 @@ namespace main
                     Console.Write($"{subordinate.Name} {subordinate.Surname}");  // Regular line
                 }
 
-                //if (popUpMenu == true && selectedIndex == i)
-                //{
-                //    //DisplayPopUpMenu(Find.FindMarkedInList(markedList, subordinate));
-                //}
-                //else
                     Console.WriteLine();
                 Console.Write("           ");
 
@@ -153,155 +137,7 @@ namespace main
                 Console.ResetColor();
             }
         }
-        //public static void LoopCase(Salesman current, Salesman boss, int count, bool menuBool, List<Salesman> marked, bool displayMode)
-        //{
-        //    if (displayMode == true)
-        //    {
-        //        #region Prohlizec
-        //        Console.Clear();
-        //        Console.WriteLine();
-        //        //Console.Clear();
-        //        Display.DisplaySalesman(current, boss, count, menuBool, marked);
-
-
-        //        //Console.WriteLine("U for up, D for down");
-        //        //Console.WriteLine("Up arrow to move up, down arrow to move down");
-        //        var key = Console.ReadKey(true).Key;
-        //        //char key = Char.ToUpper(Console.ReadKey().KeyChar);
-        //        Console.WriteLine();
-
-        //        switch (key)
-        //        {
-
-        //            case ConsoleKey.UpArrow:
-        //                // Move to the superior (previous subordinate)
-        //                if (count >= -3)
-        //                {
-        //                    count--; // Go up (previous subordinate)
-        //                }
-        //                else
-        //                {
-        //                    // Optionally handle wraparound or show a message if already at the top
-        //                    Console.WriteLine("You are already at the top!");
-        //                }
-        //                break;
-        //            case ConsoleKey.LeftArrow:
-        //                if (count == -4)
-        //                {
-        //                    count++;
-        //                }
-        //                else if (menuBool == true)
-        //                {
-        //                    menuBool = false;
-        //                }
-        //                break;
-        //            case ConsoleKey.RightArrow:
-        //                //Posouvání v menu
-        //                if (count == -3)
-        //                {
-        //                    count--;
-        //                }
-        //                else if (count > -3)
-        //                {
-        //                    menuBool = true;
-        //                }
-        //                break;
-        //            case ConsoleKey.DownArrow:
-        //                // Move to the next subordinate
-        //                if (count == -4)
-        //                {
-        //                    count += 2;
-        //                }
-        //                else if (count < current.Subordinates.Count - 1)
-        //                {
-        //                    count++; // Go down (next subordinate)
-        //                }
-
-        //                else
-        //                {
-        //                    // Optionally handle wraparound or show a message if already at the bottom
-        //                    Console.WriteLine("No more subordinates.");
-        //                }
-        //                break;
-
-        //            case ConsoleKey.Enter:
-        //                //
-
-        //                // If Enter is pressed, select the current subordinate
-        //                if (count > -1 && current.Subordinates.Count > 0)
-        //                {
-        //                    Console.WriteLine($"You selected: {current.Subordinates[count].Name}");
-
-        //                    current = current.Subordinates[count];  // Change to the selected subordinate
-        //                }
-        //                else if (count == -2)
-        //                {
-        //                    //Potencionální místo pro označování a přidání/odstraňování
-        //                    Console.WriteLine("Už jsme na pozici");
-        //                    Console.ReadKey();
-        //                }
-        //                //Přejít na šéfa
-        //                else if (count == -3)
-        //                {
-        //                    current = boss;
-        //                }
-        //                //Přepnutí na mód seznam
-        //                else if (count == -4)
-        //                {
-        //                    count--;
-        //                    Console.WriteLine("Přepnout na seznam");
-        //                    Console.ReadKey();
-        //                    displayMode = false;
-        //                }
-        //                else if (count == -5)
-        //                {
-        //                    count++;
-        //                    Console.WriteLine("Přepnout na prohlížeč");
-        //                    Console.ReadKey();
-        //                }
-        //                else
-        //                {
-        //                    //Případ kde není žádný subordinate
-        //                    current = Find.FindUpperSalesman(current, boss);
-        //                    //count = -1;
-        //                }
-        //                break;
-        //            case ConsoleKey.Spacebar:
-        //                marked = MarkSalesman(marked, current);
-
-        //                break;
-
-        //        }
-        //        #endregion
-        //    }
-        //    else
-        //    {
-
-        //    }
-        //}
-
-        //static List<Salesman> MarkSalesman(List<Salesman> markedList, Salesman target)
-        //{
-        //    bool found = false;
-        //    foreach (Salesman x in markedList)
-        //    {
-        //        if (x == target)
-        //        {
-        //            found = true;
-        //        }
-        //    }
-
-        //    if (found == true)
-        //    {
-        //        markedList.Remove(target);
-        //    }
-        //    else
-        //    {
-        //        markedList.Add(target);
-        //    }
-        //    return markedList;
-        //}
-
+        
         static void DisplayPopUpMenu(bool isMarked)
         {
 

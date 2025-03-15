@@ -153,6 +153,7 @@ class Salesman
     {
         filename = NameFile(false);
         string response = "";
+
         //Console.WriteLine("Pojmenujte seznam, jinak se bude jmenovat muj_vyber");
         //string response = Console.ReadLine()?.Trim();
         //if(response != null && response != "")

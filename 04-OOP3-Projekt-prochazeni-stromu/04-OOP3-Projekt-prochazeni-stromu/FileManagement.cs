@@ -12,7 +12,9 @@ namespace main
         //Statická vlastnost názvu současně vybraného souboru
         public static string currentListName { get; set; }
         //Statická vlastnost, určuje, zda je načten seznam.
-        public static bool isListLoaded { get; set; } = false;
+        public static bool isListLoaded { get; private set; } = false;
+
+        public static bool changed { get; set; } = false;
 
         public static void ListNotLoadedWarning()
         {
