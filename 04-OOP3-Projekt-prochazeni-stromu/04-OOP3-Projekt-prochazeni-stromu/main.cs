@@ -5,51 +5,25 @@ using System.Xml.Linq;
 
 class Program
 {
-    static void Test()
-    {
-        Salesman target = new("", "c", 0, 1);
-
-        Salesman root = new("", "root", 0, 0);
-        root.AddSubordinate(new("", "a", 0, 1));
-        root.AddSubordinate(new("", "b", 0, 1));
-        root.Subordinates[0].AddSubordinate(new("", "d", 0, 1));
-        root.Subordinates[0].AddSubordinate(target);
-
-        Salesman a = Find.FindUpperSalesman(root, root);
-        Console.WriteLine(a.Name);
-        
-    }
     static void Main(string[] args)
     {
-        //Test();
-        //return;
         
-        //Salesman boss = MakeTree();
-        //string filename = "smalltree.json";
         string filename = "largetree.json";
 
 
         //string markedListName = null;
 
-        // TODO INIT MARKED
+        //NavigationState navstate = NavigationState.Instance;
+        
         Salesman boss = Salesman.DeserializeTree(File.ReadAllText(filename));
         Salesman current = boss;
 
         //True - prohlížeè, False - seznam
         bool displayMode = true;
 
-        //Zobrazit menu - ps. nepoužívané
-        //bool menuBool = false;
-
-
         List<Salesman> marked = new List<Salesman>();
         
-
-        //Display.DisplaySalesmenTree(boss);
-
-
-
-        int count = -1;
+        int count = -2;
 
         while (true)
         {
@@ -62,7 +36,7 @@ class Program
                 Console.Clear();
                 Console.WriteLine();
                 //Console.Clear();
-                Display.DisplaySalesman(current, boss, count, marked);
+                Display.DisplayBrowser(current, boss, count, marked);
 
 
                 
@@ -79,22 +53,14 @@ class Program
                         {
                             count--; // Go up (previous subordinate)
                         }
-                        else
-                        {
-                            // Optionally handle wraparound or show a message if already at the top
-                            Console.WriteLine("You are already at the top!");
-                        }
+                                           
                         break;
                     case ConsoleKey.LeftArrow:
                         if (count == -4)
                         {
                             count++;
                         }
-                        //Prob
-                        //else if (menuBool == true)
-                        //{
-                        //    menuBool = false;
-                        //}
+                        
                         break;
                     case ConsoleKey.RightArrow:
                         //Posouvání v menu
@@ -114,11 +80,6 @@ class Program
                             count++; // Go down (next subordinate)
                         }
 
-                        else
-                        {
-                            // Optionally handle wraparound or show a message if already at the bottom
-                            Console.WriteLine("No more subordinates.");
-                        }
                         break;
 
                     case ConsoleKey.Enter:
@@ -165,7 +126,17 @@ class Program
                             FileManagement.ListNotLoadedWarning();
                         break;
                     case ConsoleKey.Escape:
-                        Environment.Exit(1);
+                        if (FileManagement.changed == true)
+                        {
+                            if (FileManagement.ListNotSavedWarning())
+                            {
+                                Environment.Exit(1);
+                            }
+                        }
+                        else
+                        {
+                            Environment.Exit(1);
+                        }
                         break;
 
                 }
@@ -174,60 +145,8 @@ class Program
             }
             else
             {
-                Console.Clear();
                 #region Seznam
-                if (count == -5)
-                    Display.HighlightedColouring();
-                else
-                    Display.ForegroundColor("dblue");
-                Console.Write("Založit");
-                Display.ForegroundColor("reset");
-                Console.Write(" | ");
-                if (count == -6)
-                    Display.HighlightedColouring();
-                else
-                    Display.ForegroundColor("dblue");
-                Console.Write("Naèíst");
-                Display.ForegroundColor("reset");
-                Console.Write(" | ");
-                if (count == -7)
-                    Display.HighlightedColouring();
-                else
-                    Display.ForegroundColor("dblue");
-                Console.Write("Uložit");
-                Display.ForegroundColor("reset");
-                Console.Write(" | ");
-                if (count == -8)
-                    Display.HighlightedColouring();
-                else
-                    Display.ForegroundColor("dblue");
-                Console.Write("Pøejít na prohlížeè\n");
-                Display.ForegroundColor("reset");
-
-                Console.WriteLine("- - - - - - - - - - - - - - - - - - - - - - -");
-                Console.WriteLine($"Seznam: {FileManagement.currentListName}");
-                Console.WriteLine("- - - - - - - - -");
-
-                //foreach (Salesman x in marked)
-                //{
-
-                //    Console.WriteLine(x.Name+" "+x.Surname);
-                //}
-
-                for (int i = 0; i < marked.Count; i++)
-                {
-                    if(count == i)
-                    {
-                        Display.HighlightedColouring();
-                        Console.WriteLine($"{marked[i].Name} {marked[i].Surname}");
-                        Console.ResetColor();
-                    }
-                    else
-                    {
-                        Console.WriteLine($"{marked[i].Name} {marked[i].Surname}");
-                    }
-                }
-
+                Display.DisplayList(current, boss,count, marked);
 
                     //Input
                     key = Console.ReadKey(true).Key;
@@ -308,16 +227,25 @@ class Program
                         }
                         break;
                     case ConsoleKey.Escape:
-                        Environment.Exit(1);
+                        if (FileManagement.changed == true)
+                        {
+                            if (FileManagement.ListNotSavedWarning())
+                            {
+                                Environment.Exit(1);
+                            }
+                        }
+                        else
+                        {
+                            Environment.Exit(1);
+                        }
                         break;
-                    
-
-
                         #endregion
                 }
             }
         }
     }
+
+    
 
     static List<Salesman> MarkSalesman(List<Salesman> markedList, Salesman target)
     {
@@ -332,10 +260,12 @@ class Program
 
         if(found == true)
         {
+            FileManagement.changed = true;
             markedList.Remove(target);
         }
         else
         {
+            FileManagement.changed = true;
             markedList.Add(target);
         }
         return markedList;

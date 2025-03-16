@@ -24,6 +24,21 @@ namespace main
             Console.ReadKey();
         }
 
+        public static bool ListNotSavedWarning()
+        {
+            Console.WriteLine("Seznam není uložen, i tak ukončit program? (ano)");
+            string response = Console.ReadLine()?.Trim().ToLower();
+
+            if (response == "ano")
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
+        }
+
         public static void ListIsLoaded()
         {
             isListLoaded = true;

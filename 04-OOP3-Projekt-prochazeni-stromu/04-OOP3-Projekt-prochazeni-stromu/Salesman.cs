@@ -91,6 +91,7 @@ class Salesman
             }
         }
 
+        FileManagement.changed = false;
         //List id
         List<int> markedSalesmenIDs = new List<int>();
 
@@ -196,6 +197,7 @@ class Salesman
                 else
                 {
                     Console.WriteLine("Ukládání pøerušeno");
+                    Console.ReadKey();
                 }
 
             }

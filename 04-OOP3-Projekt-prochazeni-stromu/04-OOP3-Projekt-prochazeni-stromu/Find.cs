@@ -8,19 +8,9 @@ namespace main
 {
     static class Find
     {
-        static void FindSalesmanRecursive(Salesman parentNode, string surname)
-        {
-            if (parentNode.Surname == surname)
-                Console.WriteLine($"{parentNode.Name} {parentNode.Surname} - Sales:{parentNode.Sales}");
-
-            foreach (var subordinate in parentNode.Subordinates)
-            {
-                FindSalesmanRecursive(subordinate, surname);
-            }
-        }
         public static bool FindMarkedInList(List<Salesman> markedList, Salesman target)
         {
-            foreach(Salesman x in markedList)
+            foreach (Salesman x in markedList)
             {
                 if (x == target)
                     return true;
@@ -56,65 +46,6 @@ namespace main
             return null;
         }
 
-        static void FindSalesmanStack(Salesman parentNode, string surname)
-        {
-            Stack<Salesman> toBeVisited = new Stack<Salesman>();
-            toBeVisited.Push(parentNode);
-
-            while (toBeVisited.Count > 0)
-            {
-                Salesman current = toBeVisited.Pop();
-                if (current.Surname == surname)
-                    Console.WriteLine($"{current.Name} {current.Surname} - Sales:{current.Sales}");
-
-                foreach (var sub in current.Subordinates)
-                {
-                    toBeVisited.Push(sub);
-                }
-            }
-        }
-        #region ui
-
-
-        #endregion
-        static void FindSalesmanQueue(Salesman parentNode, string surname)
-        {
-            Queue<Salesman> toBeVisited = new Queue<Salesman>();
-            toBeVisited.Enqueue(parentNode);
-
-            while (toBeVisited.Count > 0)
-            {
-                Salesman current = toBeVisited.Dequeue();
-                if (current.Surname == surname)
-                    Console.WriteLine($"{current.Name} {current.Surname} - Sales:{current.Sales}");
-
-                foreach (var sub in current.Subordinates)
-                {
-                    toBeVisited.Enqueue(sub);
-                }
-            }
-        }
-
-        static int GetTotalSalesQueue(Salesman parentNode, string surname)
-        {
-            int total = 0;
-            Queue<Salesman> toBeVisited = new Queue<Salesman>();
-            toBeVisited.Enqueue(parentNode);
-
-            while (toBeVisited.Count > 0)
-            {
-                Salesman current = toBeVisited.Dequeue();
-                total += current.Sales;
-                //if (current.Surname == surname)
-                //    Console.WriteLine($"{current.Name} {current.Surname} - Sales:{current.Sales}");
-
-                foreach (Salesman sub in current.Subordinates)
-                {
-                    toBeVisited.Enqueue(sub);
-                }
-            }
-            return total;
-        }
 
         public static int GetTotalSalesRecursive(Salesman parentNode)
         {
@@ -129,26 +60,5 @@ namespace main
             return sum;
         }
 
-        static Salesman[] GetSalesmanStack(Salesman parentNode, string surname)
-        {
-            List<Salesman> found = new List<Salesman>();
-            Stack<Salesman> toBeVisited = new Stack<Salesman>();
-            toBeVisited.Push(parentNode);
-
-            while (toBeVisited.Count > 0)
-            {
-                Salesman current = toBeVisited.Pop();
-                if (current.Surname == surname)
-                    found.Add(current);
-
-                foreach (var sub in current.Subordinates)
-                {
-                    toBeVisited.Push(sub);
-                }
-            }
-            return found.ToArray();
-        }
-
-        
     }
 }
