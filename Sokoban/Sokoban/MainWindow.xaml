@@ -1,0 +1,45 @@
+﻿<Window x:Class="Sokoban.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Sokoban"
+        mc:Ignorable="d"
+        x:Name="Map"
+        Title="MainWindow" Height="450" Width="800">
+    <Grid x:Name="PlayField">
+        
+        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+            <ColumnDefinition/>
+        </Grid.ColumnDefinitions>
+
+        <Grid.RowDefinitions>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+            <RowDefinition/>
+        </Grid.RowDefinitions>
+
+        
+        
+        <Rectangle x:Name="Character" Fill="Blue" Grid.Column="{Binding ElementName=Map,Path=_characterX}" Grid.Row="{Binding ElementName=Map,Path=_characterY}"/>
+
+        <Button Content="Up" Grid.Column="5" Grid.Row="5" Click="Button_MoveUp"/>
+
+        <Button Content="Left" Grid.Column="4" Grid.Row="6" Click="Button_MoveLeft"/>
+
+        <Button Content="Down" Grid.Column="5" Grid.Row="6" Click="Button_MoveDown"/>
+
+        <Button Content="Right" Grid.Column="6" Grid.Row="6" Click="Button_MoveRight" />
+    </Grid>
+</Window>
