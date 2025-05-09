@@ -4,17 +4,6 @@
              xmlns:local="clr-namespace:Sokoban"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
-        <Style x:Key="GroundBlockStyle" TargetType="UserControl">
-            <Setter Property="Background" Value="Beige"/>
-        </Style>
-        
-        <Style x:Key="GoalBlockStyle" TargetType="UserControl">
-            <Setter Property="Background" Value="Yellow"/>
-        </Style>
-
-        <Style x:Key="WallBlockStyle" TargetType="UserControl">
-            <Setter Property="Background" Value="Red"/>
-        </Style>
-        
+       
     </Application.Resources>
 </Application>
