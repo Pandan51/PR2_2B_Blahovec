@@ -11,15 +11,16 @@ using System.Windows.Shapes;
 
 namespace Sokoban2
 {
-    internal enum BlockStyles {Wall, Ground}
+    internal enum BlockStyles { Wall, Ground }
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
     public partial class MainWindow : Window
     {
-        
+
         private int arrayXSize = 5;
         private int arrayYSize = 5;
+        private Blocks _player;
         private char[,] _playGrid;
         public int _characterX
         {
@@ -44,10 +45,14 @@ namespace Sokoban2
             DependencyProperty.Register("_characterY", typeof(int), typeof(MainWindow), new PropertyMetadata(2));
 
 
-        private void Deal()
+        private void Start()
         {
+            _playGrid = Create2DArray();
+
+            arrayXSize = _playGrid.GetLength(1);
+            arrayYSize = _playGrid.GetLength(0);
             //promažu, kdyby tam něco bylo
-            
+
             PlayingFieldGrid.ColumnDefinitions.Clear();
             PlayingFieldGrid.RowDefinitions.Clear();
 
@@ -68,30 +73,39 @@ namespace Sokoban2
             {
                 for (int j = 0; j < arrayXSize; j++)
                 {
-                    if (i != arrayXSize && j != arrayYSize)
-                    {
+                    //if (i != arrayXSize && j != arrayYSize)
+                    //{
                         Blocks block = new Blocks();
-                        block.Style = (Style)FindResource(GetStyles(BlockStyles.Ground));
+
+                        block.Style = (Style)FindResource(GetStyles(_playGrid[i, j]));
                         Grid.SetRow(block, i);
                         Grid.SetColumn(block, j);
-                        PlayingFieldGrid.Children.Add(block);
+                    //Test
+                    if (_playGrid[i, j] == 'P')
+                    {
+                        _player = block;
                     }
+                        PlayingFieldGrid.Children.Add(block);
+                    //}
                 }
             }
 
 
         }
-            public MainWindow()
+        public MainWindow()
         {
             InitializeComponent();
-            Deal();
+            Start();
         }
 
         private void Button_MoveUp(object sender, RoutedEventArgs e)
         {
-            if(_characterY > 0)
+            if (_characterY > 0)
             {
+
                 _characterY--;
+                Grid.SetRow(_player, _characterY);
+                Grid.SetColumn(_player, _characterX);
             }
 
         }
@@ -99,37 +113,51 @@ namespace Sokoban2
         private void Button_MoveLeft(object sender, RoutedEventArgs e)
         {
             if (_characterX > 0)
+            {
                 _characterX--;
+                Grid.SetRow(_player, _characterY);
+                Grid.SetColumn(_player, _characterX);
+            }
         }
 
         private void Button_MoveDown(object sender, RoutedEventArgs e)
         {
             if (_characterY < arrayYSize)
+            {
                 _characterY++;
+                Grid.SetRow(_player, _characterY);
+                Grid.SetColumn(_player, _characterX);
+            }
         }
 
         private void Button_MoveRight(object sender, RoutedEventArgs e)
         {
             if (_characterX < arrayXSize)
+            {
                 _characterX++;
+                Grid.SetRow(_player, _characterY);
+                Grid.SetColumn(_player, _characterX);
+            }
         }
 
-        private string GetStyles(BlockStyles style)
+
+        private string GetStyles(char style)
         {
-            if(style == BlockStyles.Wall)
+            switch (style)
             {
-                return "WallBlockStyle";
-            }
-            else if(style == BlockStyles.Ground)
-            {
-                return "GroundBlockStyle";
-            }
-            else
-            {
-                throw new ArgumentOutOfRangeException();
+                case 'W':
+                    return "WallBlockStyle";
+                case 'G':
+                    return "GroundBlockStyle";
+                case 'P':
+                    return "PlayerBlockStyle";
+                default:
+                    return "G";
+                
             }
         }
 
+        //TODO - implement scaling
         private char[,] Create2DArray()
         {
             char[,] grid = new char[arrayXSize, arrayYSize];
@@ -138,7 +166,7 @@ namespace Sokoban2
             // First fill the grid with random "W" or "G"
             for (int row = 0; row < grid.GetLength(0); row++)
             {
-                for (int col = 0; grid.GetLength(1) < 5; col++)
+                for (int col = 0; col < grid.GetLength(1); col++)
                 {
                     grid[row, col] = rand.NextDouble() < 0.3 ? 'W' : 'G'; // 30% chance wall, 70% ground
                 }
@@ -148,8 +176,10 @@ namespace Sokoban2
             int playerRow = rand.Next(5);
             int playerCol = rand.Next(5);
             grid[playerRow, playerCol] = 'P';
+            _characterX = playerCol;
+            _characterY = playerRow;
 
-            // Print the grid
+            //Print the grid
             //for (int row = 0; row < 5; row++)
             //{
             //    for (int col = 0; col < 5; col++)
@@ -158,6 +188,7 @@ namespace Sokoban2
             //    }
             //    Console.WriteLine();
             //}
+            
             return grid;
         }
     }

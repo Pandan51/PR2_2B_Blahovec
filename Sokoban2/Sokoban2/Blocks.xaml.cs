@@ -24,5 +24,7 @@ namespace Sokoban2
         {
             InitializeComponent();
         }
+
+
     }
 }

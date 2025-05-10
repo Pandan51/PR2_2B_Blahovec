@@ -13,5 +13,10 @@
             <Setter Property="Background" Value="Beige"/>
             <Setter Property="Margin" Value="5"/>
         </Style>
+
+        <Style x:Key="PlayerBlockStyle" TargetType="{x:Type local:Blocks}">
+            <Setter Property="Background" Value="Orange"/>
+            <Setter Property="Margin" Value="5"/>
+        </Style>
     </Application.Resources>
 </Application>
