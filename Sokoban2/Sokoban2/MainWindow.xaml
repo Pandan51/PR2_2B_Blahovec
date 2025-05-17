@@ -32,7 +32,7 @@
             <Grid.RowDefinitions>
                 
             </Grid.RowDefinitions>
-            <Rectangle x:Name="Character" Fill="Blue" Grid.Column="{Binding ElementName=Map,Path=_characterX}" Grid.Row="{Binding ElementName=Map,Path=_characterY}"/>
+            <!--<Rectangle x:Name="Character" Fill="Blue" Grid.Column="{Binding ElementName=Map,Path=_characterColumn}" Grid.Row="{Binding ElementName=Map,Path=_characterY}"/>-->
         </Grid>
 
         <Grid x:Name="ControlsGrid" Grid.Column="0" Grid.Row="1">
