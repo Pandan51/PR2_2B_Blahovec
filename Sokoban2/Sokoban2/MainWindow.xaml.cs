@@ -107,6 +107,7 @@ namespace Sokoban2
                     if (_playGrid[i, j] == 'P')
                     {
                         _player = block;
+                        _player.Content = "player";
                     }
                     PlayingFieldGrid.Children.Add(block);
                     //}
@@ -125,13 +126,23 @@ namespace Sokoban2
         {
             if (_characterRow > 0)
             {
+                
+                //Blok ve směru
                 Blocks temp = _blocksGrid[_characterColumn, _characterRow - 1];
 
-                //Blocks pPos = new Blocks();
-                //Blocks newPos = new Blocks();
-                //Blocks changePos = new Blocks();
-                
-                Grid.SetRow(temp, _characterRow);
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
+
+
+
+
+
+                    //Blocks pPos = new Blocks();
+                    //Blocks newPos = new Blocks();
+                    //Blocks changePos = new Blocks();
+
+                    Grid.SetRow(temp, _characterRow);
                 //change
                 _blocksGrid[_characterColumn, _characterRow] = temp;
 
@@ -140,9 +151,13 @@ namespace Sokoban2
                 _blocksGrid[_characterColumn, _characterRow] = _player;
                 Grid.SetRow(_player, _characterRow);
 
-                temp.Content = "up";
-                _player.Content = "up";
                 
+                    
+                }
+
+                
+                
+
 
             }
 
@@ -154,19 +169,22 @@ namespace Sokoban2
             {
                 Blocks temp = _blocksGrid[_characterColumn - 1, _characterRow];
 
-                
-                Grid.SetColumn(temp, _characterColumn);
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
 
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = temp;
+                    Grid.SetColumn(temp, _characterColumn);
 
-                _characterColumn--;
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = _player;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
 
-                Grid.SetColumn(_player, _characterColumn);
-                temp.Content = "left";
-                _player.Content = "left";
+                    _characterColumn--;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
+
+                    Grid.SetColumn(_player, _characterColumn);
+                    
+                }
             }
         }
 
@@ -176,17 +194,19 @@ namespace Sokoban2
             {
                 Blocks temp = _blocksGrid[_characterColumn, _characterRow + 1];
 
-                Grid.SetRow(temp, _characterRow);
-                //Change
-                _blocksGrid[_characterColumn, _characterRow] = temp;
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
+                    Grid.SetRow(temp, _characterRow);
+                    //Change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
 
-                _characterRow++;
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = _player;
-                Grid.SetRow(_player, _characterRow);
-                temp.Content = "down";
-                _player.Content = "down";
-
+                    _characterRow++;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
+                    Grid.SetRow(_player, _characterRow);
+                    
+                }
             }
         }
 
@@ -195,20 +215,21 @@ namespace Sokoban2
             if (_characterColumn < arrayXSize - 1)
             {
                 Blocks temp = _blocksGrid[_characterColumn + 1, _characterRow];
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
 
-                
-                Grid.SetColumn(temp, _characterColumn);
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = temp;
+                    Grid.SetColumn(temp, _characterColumn);
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
 
-                _characterColumn++;
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = _player;
+                    _characterColumn++;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
 
-                Grid.SetColumn(_player, _characterColumn);
-                temp.Content = "right";
-                _player.Content = "right";
-
+                    Grid.SetColumn(_player, _characterColumn);
+                    
+                }
             }
         }
 
@@ -245,7 +266,7 @@ namespace Sokoban2
             }
 
             //Odstranit později
-            grid = Custom2DArray();
+            grid = Custom2DArray(5);
             int pRow = 2;
             int pCol = 2;
             grid[pRow, pCol] = 'P';
@@ -279,18 +300,45 @@ namespace Sokoban2
             return grid;
         }
 
-        private char[,] Custom2DArray()
+        private char[,] Custom2DArray(int size)
         {
-            char[,] grid = new char[5, 5]
+            
+            if (size == 5)
             {
+                char[,] grid = new char[5, 5]
+                {
                 { 'W', 'W', 'W', 'W', 'W' },
                 { 'W', 'G', 'G', 'G', 'W' },
                 { 'W', 'G', 'P', 'G', 'W' },
                 { 'W', 'G', 'G', 'G', 'W' },
                 { 'W', 'W', 'W', 'W', 'W' }
-            };
+                };
+                return grid;
+            }
+            else if (size == 10)
+            {
+               char[,] grid = new char[10,10]
+               {
+                { 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W' },
+                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'W', 'W', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'W', 'X', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'W', 'B', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'G', 'P', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
+                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
+                { 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W' }
+                        };
+                return grid;
+            }
+            else
+            {
+                return null;
+            }
+            
 
-            return grid;
+            
         }
 
 
