@@ -11,7 +11,8 @@ using System.Windows.Shapes;
 
 namespace Sokoban2
 {
-    internal enum BlockStyles { Wall, Ground }
+    internal enum BlockStyles { Wall, Ground, Target, Box, BoxTarget, Player }
+    internal enum Direction { Up, Left, Down, Right}
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -73,6 +74,9 @@ namespace Sokoban2
             arrayXSize = _playGrid.GetLength(1);
             //řádek
             arrayYSize = _playGrid.GetLength(0);
+
+            //Reference na bloky
+            _blocksGrid = new Blocks[arrayYSize, arrayXSize];
             //promažu, kdyby tam něco bylo
 
             PlayingFieldGrid.ColumnDefinitions.Clear();
@@ -126,34 +130,8 @@ namespace Sokoban2
         {
             if (_characterRow > 0)
             {
+                Move(Direction.Up);
                 
-                //Blok ve směru
-                Blocks temp = _blocksGrid[_characterColumn, _characterRow - 1];
-
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
-
-
-
-
-
-                    //Blocks pPos = new Blocks();
-                    //Blocks newPos = new Blocks();
-                    //Blocks changePos = new Blocks();
-
-                    Grid.SetRow(temp, _characterRow);
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = temp;
-
-                _characterRow--;
-                //change
-                _blocksGrid[_characterColumn, _characterRow] = _player;
-                Grid.SetRow(_player, _characterRow);
-
-                
-                    
-                }
 
                 
                 
@@ -167,24 +145,7 @@ namespace Sokoban2
         {
             if (_characterColumn > 0)
             {
-                Blocks temp = _blocksGrid[_characterColumn - 1, _characterRow];
-
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
-
-                    Grid.SetColumn(temp, _characterColumn);
-
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
-
-                    _characterColumn--;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
-
-                    Grid.SetColumn(_player, _characterColumn);
-                    
-                }
+                Move(Direction.Left);
             }
         }
 
@@ -192,21 +153,7 @@ namespace Sokoban2
         {
             if (_characterRow < arrayYSize - 1)
             {
-                Blocks temp = _blocksGrid[_characterColumn, _characterRow + 1];
-
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
-                    Grid.SetRow(temp, _characterRow);
-                    //Change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
-
-                    _characterRow++;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
-                    Grid.SetRow(_player, _characterRow);
-                    
-                }
+                Move(Direction.Down);
             }
         }
 
@@ -214,22 +161,7 @@ namespace Sokoban2
         {
             if (_characterColumn < arrayXSize - 1)
             {
-                Blocks temp = _blocksGrid[_characterColumn + 1, _characterRow];
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
-
-                    Grid.SetColumn(temp, _characterColumn);
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
-
-                    _characterColumn++;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
-
-                    Grid.SetColumn(_player, _characterColumn);
-                    
-                }
+                Move(Direction.Right);
             }
         }
 
@@ -244,6 +176,10 @@ namespace Sokoban2
                     return "GroundBlockStyle";
                 case 'P':
                     return "PlayerBlockStyle";
+                case 'B':
+                    return "BoxBlockStyle";
+                case 'X':
+                    return "GoalBlockStyle";
                 default:
                     return "G";
 
@@ -266,16 +202,23 @@ namespace Sokoban2
             }
 
             //Odstranit později
-            grid = Custom2DArray(5);
-            int pRow = 2;
-            int pCol = 2;
-            grid[pRow, pCol] = 'P';
-            _characterColumn = pCol;
-            _characterRow = pRow;
+            grid = Custom2DArray(10);
+
+            for(int i = 0; i < grid.GetLength(0);i++)
+            {
+                for(int j = 0; j < grid.GetLength(1); j++)
+                {
+                    if (grid[i,j]=='P')
+                    {
+                        _characterColumn = j;
+                        _characterRow = i;
+                    }
+                }
+            }
+            
 
             //Změna velikosti gridu na reference bloků
-            Blocks[,] temp = new Blocks[arrayXSize, arrayYSize];
-            _blocksGrid = temp;
+            
 
             // Now place exactly one "P" at a random location
 
@@ -339,6 +282,89 @@ namespace Sokoban2
             
 
             
+        }
+
+        private void Move(Direction direction)
+        {
+            if(direction == Direction.Up)
+            {
+                //Blok ve směru
+                Blocks temp = _blocksGrid[_characterColumn, _characterRow - 1];
+
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
+
+
+                    Grid.SetRow(temp, _characterRow);
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
+
+                    _characterRow--;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
+                    Grid.SetRow(_player, _characterRow);
+
+                }
+            }
+            else if (direction == Direction.Left)
+            {
+                Blocks temp = _blocksGrid[_characterColumn - 1, _characterRow];
+
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
+
+                    Grid.SetColumn(temp, _characterColumn);
+
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
+
+                    _characterColumn--;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
+
+                    Grid.SetColumn(_player, _characterColumn);
+
+                }
+            }
+            else if (direction == Direction.Down)
+            {
+                Blocks temp = _blocksGrid[_characterColumn, _characterRow + 1];
+
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
+                    Grid.SetRow(temp, _characterRow);
+                    //Change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
+
+                    _characterRow++;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
+                    Grid.SetRow(_player, _characterRow);
+
+                }
+            }
+            else if (direction == Direction.Right)
+            {
+                Blocks temp = _blocksGrid[_characterColumn + 1, _characterRow];
+                //Kontrola, jestli blok je zeď
+                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                {
+
+                    Grid.SetColumn(temp, _characterColumn);
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = temp;
+
+                    _characterColumn++;
+                    //change
+                    _blocksGrid[_characterColumn, _characterRow] = _player;
+
+                    Grid.SetColumn(_player, _characterColumn);
+
+                }
+            }
         }
 
 
