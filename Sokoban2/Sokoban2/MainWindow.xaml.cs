@@ -111,7 +111,7 @@ namespace Sokoban2
                     if (_playGrid[i, j] == BlockStyles.Player)
                     {
                         _player = block;
-                        _player.Content = "player";
+                        
                     }
                     PlayingFieldGrid.Children.Add(block);
                     //}
@@ -284,31 +284,92 @@ namespace Sokoban2
 
         private void Move(Direction direction, int columnDir, int rowDir)
         {
-            columnDir = columnDir * 1;
-            rowDir = rowDir * 1;
-
-                //Blok ve směru
-                Blocks nextBlock = _blocksGrid[_characterColumn + (columnDir), _characterRow + (rowDir)];
-
-                //Kontrola, jestli blok je zeď
-                if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
-                {
 
 
-                    Grid.SetRow(nextBlock, _characterRow);
-                    Grid.SetColumn(nextBlock, _characterColumn);
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = nextBlock;
+            //Bloky ve směru
+            //nextBlock je vedle hráče
+            Blocks nextBlock = _blocksGrid[_characterColumn + columnDir, _characterRow + (rowDir)];
+            Blocks afterBlock = new();
+            //afterBlock je za nextBlock
+            if(nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
+                 afterBlock = _blocksGrid[_characterColumn + (2 * columnDir), _characterRow + (2 * rowDir)];
+
+            
+            
 
 
-                    _characterRow += rowDir;
+
+
+            ////Kontrola, jestli blok je zeď
+            ////Swap
+            //if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
+            //{
+
+
+            //    Grid.SetRow(nextBlock, _characterRow);
+            //    Grid.SetColumn(nextBlock, _characterColumn);
+            //    //change
+            //    _blocksGrid[_characterColumn, _characterRow] = nextBlock;
+
+
+            //    _characterRow += rowDir;
+            //    _characterColumn += columnDir;
+            //    //change
+            //    _blocksGrid[_characterColumn, _characterRow] = _player;
+            //    Grid.SetRow(_player, _characterRow);
+            //    Grid.SetColumn(_player, _characterColumn);
+
+            //}
+
+            //Next block
+            switch (_playGrid[Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock)])
+            {
+                case BlockStyles.Wall:
+                    break;
+
+                case BlockStyles.Ground:
+
+                    int[] PPos = { Grid.GetRow(_player), Grid.GetColumn(_player) };
+                    int[] NBPos = { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
+
+                    AutoStyle(nextBlock, BlockStyles.Player);
+                    _playGrid[NBPos[0], NBPos[1]] = BlockStyles.Player;
+
+                    if (_playGrid[PPos[0], PPos[1]] == BlockStyles.Player)
+                    {
+                        AutoStyle(_player, BlockStyles.Ground);
+                        _player.Content = "Ground";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Ground;
+                    }
+                    else
+                    {
+                        AutoStyle(_player, BlockStyles.Target);
+                        _player.Content = "Target";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Target;
+                    }
+
+
+
                     _characterColumn += columnDir;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
-                    Grid.SetRow(_player, _characterRow);
-                    Grid.SetColumn(_player, _characterColumn);
+                    _characterRow += rowDir;
+
+                    _player = nextBlock;
+                    
+
+                    break;
+                case BlockStyles.Target:
+
+                    break;
+                case BlockStyles.Box:
+
+                    break;
+                case BlockStyles.BoxTarget:
+
+                    break;
 
             }
+
+
 
             //if(direction == Direction.Up)
             //{
@@ -391,6 +452,9 @@ namespace Sokoban2
             //}
         }
 
-
+        private void AutoStyle(Blocks blockTarget, BlockStyles blockTarget_style)
+        {
+            blockTarget.Style = (Style)FindResource(GetStyles(blockTarget_style));
+        }
     }
 }

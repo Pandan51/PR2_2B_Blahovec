@@ -15,9 +15,9 @@
         </Style>
 
         <Style x:Key="PlayerBlockStyle" TargetType="{x:Type local:Blocks}">
-            <Setter Property="Background" Value="Beige"/>
+            <Setter Property="Background" Value="Green"/>
             <Setter Property="Padding" Value="5"/>
-            <Setter Property="Foreground" Value="Orange"/>
+            <Setter Property="Foreground" Value="Green"/>
             <Setter Property="Margin" Value="5"/>
         </Style>
         <Style x:Key="BoxBlockStyle" TargetType="{x:Type local:Blocks}">
@@ -29,7 +29,7 @@
             <Setter Property="Margin" Value="5"/>
         </Style>
         <Style x:Key="BoxGoalBlockStyle" TargetType="{x:Type local:Blocks}">
-            <Setter Property="Background" Value="Yellow"/>
+            <Setter Property="Background" Value="DarkOrange"/>
             <Setter Property="Padding" Value="5"/>
             <Setter Property="Foreground" Value="Red"/>
             <Setter Property="Margin" Value="5"/>
@@ -37,7 +37,7 @@
         <Style x:Key="PlayerGoalBlockStyle" TargetType="{x:Type local:Blocks}">
             <Setter Property="Background" Value="Yellow"/>
             <Setter Property="Padding" Value="5"/>
-            <Setter Property="Foreground" Value="Orange"/>
+            <Setter Property="Foreground" Value="Green"/>
             <Setter Property="Margin" Value="5"/>
         </Style>
     </Application.Resources>
