@@ -11,7 +11,7 @@ using System.Windows.Shapes;
 
 namespace Sokoban2
 {
-    internal enum BlockStyles { Wall, Ground, Target, Box, BoxTarget, Player }
+    internal enum BlockStyles { Wall, Ground, Target, Box, BoxTarget, Player, PlayerTarget }
     internal enum Direction { Up, Left, Down, Right}
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -24,7 +24,7 @@ namespace Sokoban2
         //Hráč
         private Blocks _player;
         //
-        private char[,] _playGrid;
+        private BlockStyles[,] _playGrid;
         private Blocks[,] _blocksGrid;
 
         //Sloupec (_characterX)
@@ -108,7 +108,7 @@ namespace Sokoban2
                     Grid.SetRow(block, i);
                     Grid.SetColumn(block, j);
                     //Test
-                    if (_playGrid[i, j] == 'P')
+                    if (_playGrid[i, j] == BlockStyles.Player)
                     {
                         _player = block;
                         _player.Content = "player";
@@ -130,13 +130,7 @@ namespace Sokoban2
         {
             if (_characterRow > 0)
             {
-                Move(Direction.Up);
-                
-
-                
-                
-
-
+                Move(Direction.Up, 0,-1);
             }
 
         }
@@ -145,7 +139,7 @@ namespace Sokoban2
         {
             if (_characterColumn > 0)
             {
-                Move(Direction.Left);
+                Move(Direction.Left, -1,0);
             }
         }
 
@@ -153,7 +147,7 @@ namespace Sokoban2
         {
             if (_characterRow < arrayYSize - 1)
             {
-                Move(Direction.Down);
+                Move(Direction.Down,0,1);
             }
         }
 
@@ -161,45 +155,49 @@ namespace Sokoban2
         {
             if (_characterColumn < arrayXSize - 1)
             {
-                Move(Direction.Right);
+                Move(Direction.Right,1,0);
             }
         }
 
 
-        private string GetStyles(char style)
+        private string GetStyles(BlockStyles style)
         {
             switch (style)
             {
-                case 'W':
+                case BlockStyles.Wall:
                     return "WallBlockStyle";
-                case 'G':
+                case BlockStyles.Ground:
                     return "GroundBlockStyle";
-                case 'P':
+                case BlockStyles.Player:
                     return "PlayerBlockStyle";
-                case 'B':
+                case BlockStyles.Box:
                     return "BoxBlockStyle";
-                case 'X':
+                case BlockStyles.Target:
                     return "GoalBlockStyle";
+                case BlockStyles.BoxTarget:
+                    return "BoxGoalBlockStyle";
+                case BlockStyles.PlayerTarget:
+                    return "PlayerGoalBlockStyle";
                 default:
-                    return "G";
+                    return "GroundBlockStyle";
 
             }
         }
 
         //TODO - implement scaling
-        private char[,] Create2DArray()
+        private BlockStyles[,] Create2DArray()
         {
-            char[,] grid = new char[arrayXSize, arrayYSize];
+            BlockStyles[,] grid = new BlockStyles[arrayXSize, arrayYSize];
             Random rand = new Random();
 
-            // First fill the grid with random "W" or "G"
-            for (int row = 0; row < grid.GetLength(0); row++)
-            {
-                for (int col = 0; col < grid.GetLength(1); col++)
-                {
-                    grid[row, col] = rand.NextDouble() < 0.3 ? 'W' : 'G'; // 30% chance wall, 70% ground
-                }
-            }
+            //// First fill the grid with random "W" or "G"
+            //for (int row = 0; row < grid.GetLength(0); row++)
+            //{
+            //    for (int col = 0; col < grid.GetLength(1); col++)
+            //    {
+            //        grid[row, col] = rand.NextDouble() < 0.3 ? 'W' : 'G'; // 30% chance wall, 70% ground
+            //    }
+            //}
 
             //Odstranit později
             grid = Custom2DArray(10);
@@ -208,7 +206,7 @@ namespace Sokoban2
             {
                 for(int j = 0; j < grid.GetLength(1); j++)
                 {
-                    if (grid[i,j]=='P')
+                    if (grid[i,j]==BlockStyles.Player)
                     {
                         _characterColumn = j;
                         _characterRow = i;
@@ -243,36 +241,36 @@ namespace Sokoban2
             return grid;
         }
 
-        private char[,] Custom2DArray(int size)
+        private BlockStyles[,] Custom2DArray(int size)
         {
             
             if (size == 5)
             {
-                char[,] grid = new char[5, 5]
+                BlockStyles[,] grid = new BlockStyles[5, 5]
                 {
-                { 'W', 'W', 'W', 'W', 'W' },
-                { 'W', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'P', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'W' },
-                { 'W', 'W', 'W', 'W', 'W' }
-                };
+                { BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall },
+            { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall }
+        };
                 return grid;
             }
             else if (size == 10)
             {
-               char[,] grid = new char[10,10]
+                BlockStyles[,] grid = new BlockStyles[10,10]
                {
-                { 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W' },
-                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'W', 'W', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'W', 'X', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'W', 'B', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'G', 'P', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
-                { 'W', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'W' },
-                { 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W', 'W' }
-                        };
+                { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall }
+        };
                 return grid;
             }
             else
@@ -284,87 +282,113 @@ namespace Sokoban2
             
         }
 
-        private void Move(Direction direction)
+        private void Move(Direction direction, int columnDir, int rowDir)
         {
-            if(direction == Direction.Up)
-            {
+            columnDir = columnDir * 1;
+            rowDir = rowDir * 1;
+
                 //Blok ve směru
-                Blocks temp = _blocksGrid[_characterColumn, _characterRow - 1];
+                Blocks nextBlock = _blocksGrid[_characterColumn + (columnDir), _characterRow + (rowDir)];
 
                 //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
+                if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
                 {
 
 
-                    Grid.SetRow(temp, _characterRow);
+                    Grid.SetRow(nextBlock, _characterRow);
+                    Grid.SetColumn(nextBlock, _characterColumn);
                     //change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
+                    _blocksGrid[_characterColumn, _characterRow] = nextBlock;
 
-                    _characterRow--;
+
+                    _characterRow += rowDir;
+                    _characterColumn += columnDir;
                     //change
                     _blocksGrid[_characterColumn, _characterRow] = _player;
                     Grid.SetRow(_player, _characterRow);
-
-                }
-            }
-            else if (direction == Direction.Left)
-            {
-                Blocks temp = _blocksGrid[_characterColumn - 1, _characterRow];
-
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
-
-                    Grid.SetColumn(temp, _characterColumn);
-
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
-
-                    _characterColumn--;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
-
                     Grid.SetColumn(_player, _characterColumn);
 
-                }
             }
-            else if (direction == Direction.Down)
-            {
-                Blocks temp = _blocksGrid[_characterColumn, _characterRow + 1];
 
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
-                    Grid.SetRow(temp, _characterRow);
-                    //Change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
+            //if(direction == Direction.Up)
+            //{
+            //    //Blok ve směru
+            //    Blocks nextBlock = _blocksGrid[_characterColumn, _characterRow - 1];
 
-                    _characterRow++;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
-                    Grid.SetRow(_player, _characterRow);
+            //    //Kontrola, jestli blok je zeď
+            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
+            //    {
 
-                }
-            }
-            else if (direction == Direction.Right)
-            {
-                Blocks temp = _blocksGrid[_characterColumn + 1, _characterRow];
-                //Kontrola, jestli blok je zeď
-                if (temp.Style != (Style)FindResource(GetStyles('W')))
-                {
 
-                    Grid.SetColumn(temp, _characterColumn);
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = temp;
+            //        Grid.SetRow(nextBlock, _characterRow);
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
 
-                    _characterColumn++;
-                    //change
-                    _blocksGrid[_characterColumn, _characterRow] = _player;
+            //        _characterRow--;
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = _player;
+            //        Grid.SetRow(_player, _characterRow);
 
-                    Grid.SetColumn(_player, _characterColumn);
+            //    }
+            //}
+            //else if (direction == Direction.Left)
+            //{
+            //    Blocks nextBlock = _blocksGrid[_characterColumn - 1, _characterRow];
 
-                }
-            }
+            //    //Kontrola, jestli blok je zeď
+            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
+            //    {
+
+            //        Grid.SetColumn(nextBlock, _characterColumn);
+
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
+
+            //        _characterColumn--;
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = _player;
+
+            //        Grid.SetColumn(_player, _characterColumn);
+
+            //    }
+            //}
+            //else if (direction == Direction.Down)
+            //{
+            //    Blocks nextBlock = _blocksGrid[_characterColumn, _characterRow + 1];
+
+            //    //Kontrola, jestli blok je zeď
+            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
+            //    {
+            //        Grid.SetRow(nextBlock, _characterRow);
+            //        //Change
+            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
+
+            //        _characterRow++;
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = _player;
+            //        Grid.SetRow(_player, _characterRow);
+
+            //    }
+            //}
+            //else if (direction == Direction.Right)
+            //{
+            //    Blocks nextBlock = _blocksGrid[_characterColumn + 1, _characterRow];
+            //    //Kontrola, jestli blok je zeď
+            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
+            //    {
+
+            //        Grid.SetColumn(nextBlock, _characterColumn);
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
+
+            //        _characterColumn++;
+            //        //change
+            //        _blocksGrid[_characterColumn, _characterRow] = _player;
+
+            //        Grid.SetColumn(_player, _characterColumn);
+
+            //    }
+            //}
         }
 
 
