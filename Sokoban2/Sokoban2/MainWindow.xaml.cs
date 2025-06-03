@@ -4,6 +4,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Input.Manipulations;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -13,6 +14,8 @@ namespace Sokoban2
 {
     internal enum BlockStyles { Wall, Ground, Target, Box, BoxTarget, Player, PlayerTarget }
     internal enum Direction { Up, Left, Down, Right}
+
+    internal enum GameStage {Victory, PlayStage}
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -31,7 +34,17 @@ namespace Sokoban2
 
         private int _characterColumn = 2;
         private int _characterRow = 2;
+        private GameStage _gameStage = GameStage.PlayStage;
+
+        private int _targetBlockCount = 0;
+        private int _activeTargetBlocks = 0;
+
+
+
         
+
+
+
 
 
 
@@ -82,17 +95,26 @@ namespace Sokoban2
             PlayingFieldGrid.ColumnDefinitions.Clear();
             PlayingFieldGrid.RowDefinitions.Clear();
 
+            var cellSize = new System.Windows.GridLength(50);
+
             //připravím řádky, sloupce
             //Zatím stále,
             //TODO později implementovat velikost
             for (int i = 0; i < arrayXSize; i++)
             {
-                PlayingFieldGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                var colDef = new ColumnDefinition();
+                colDef.Width = cellSize;
+                
+
+
+                PlayingFieldGrid.ColumnDefinitions.Add(colDef);
             }
 
             for (int i = 0; i < arrayYSize; i++)
             {
-                PlayingFieldGrid.RowDefinitions.Add(new RowDefinition());
+                var rowDef = new RowDefinition();
+                rowDef.Height = cellSize;
+                PlayingFieldGrid.RowDefinitions.Add(rowDef);
             }
 
             for (int i = 0; i < arrayYSize; i++)
@@ -105,6 +127,15 @@ namespace Sokoban2
                     _blocksGrid[j, i] = block;
 
                     block.Style = (Style)FindResource(GetStyles(_playGrid[i, j]));
+                    if(_playGrid[i, j]==BlockStyles.Target)
+                    {
+                        _targetBlockCount++;
+                    }
+                    else if(_playGrid[i, j] == BlockStyles.BoxTarget)
+                    {
+                        _targetBlockCount++;
+                        _activeTargetBlocks++;
+                    }
                     Grid.SetRow(block, i);
                     Grid.SetColumn(block, j);
                     //Test
@@ -263,8 +294,8 @@ namespace Sokoban2
                 { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
@@ -283,7 +314,7 @@ namespace Sokoban2
         }
 
         private void Move(Direction direction, int columnDir, int rowDir)
-        {
+                {
 
 
             //Bloky ve směru
@@ -338,13 +369,13 @@ namespace Sokoban2
                     if (_playGrid[PPos[0], PPos[1]] == BlockStyles.Player)
                     {
                         AutoStyle(_player, BlockStyles.Ground);
-                        _player.Content = "Ground";
+                        //_player.Content = "Ground";
                         _playGrid[PPos[0], PPos[1]] = BlockStyles.Ground;
                     }
                     else
                     {
                         AutoStyle(_player, BlockStyles.Target);
-                        _player.Content = "Target";
+                        //_player.Content = "Target";
                         _playGrid[PPos[0], PPos[1]] = BlockStyles.Target;
                     }
 
@@ -358,16 +389,133 @@ namespace Sokoban2
 
                     break;
                 case BlockStyles.Target:
+                    PPos = new int [2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
+                    NBPos = new int [2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
+
+                    AutoStyle(nextBlock, BlockStyles.PlayerTarget);
+                    _playGrid[NBPos[0], NBPos[1]] = BlockStyles.PlayerTarget;
+
+                    if (_playGrid[PPos[0], PPos[1]] == BlockStyles.Player)
+                    {
+                        AutoStyle(_player, BlockStyles.Ground);
+                        //_player.Content = "Ground";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Ground;
+                    }
+                    else
+                    {
+                        AutoStyle(_player, BlockStyles.Target);
+                        //_player.Content = "Target";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Target;
+                    }
+
+
+
+                    _characterColumn += columnDir;
+                    _characterRow += rowDir;
+
+                    _player = nextBlock;
+
 
                     break;
                 case BlockStyles.Box:
+                    PPos = new int[2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
+                    NBPos = new int[2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
+                    int[] ABPos = new int[2] {Grid.GetRow(afterBlock), Grid.GetColumn(afterBlock) };
+
+                    if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Wall || _playGrid[ABPos[0], ABPos[1]] == BlockStyles.Box || _playGrid[ABPos[0], ABPos[1]] == BlockStyles.BoxTarget)
+                    {
+                        break;
+                    }
+
+                    if(_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Ground)
+                    {
+                        _playGrid[ABPos[0], ABPos[1]] = BlockStyles.Box;
+                        AutoStyle(afterBlock, BlockStyles.Box);
+                        
+                    }
+                    else
+                    {
+                        _playGrid[ABPos[0], ABPos[1]] = BlockStyles.BoxTarget;
+                        AutoStyle(afterBlock, BlockStyles.BoxTarget);
+                        _activeTargetBlocks++;
+                    }
+
+                    _playGrid[NBPos[0], NBPos[1]] = BlockStyles.Player;
+                    AutoStyle(nextBlock, BlockStyles.Player);
+                    
+
+                    if (_playGrid[PPos[0], PPos[1]] == BlockStyles.Player)
+                    {
+                        AutoStyle(_player, BlockStyles.Ground);
+                        //_player.Content = "Ground";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Ground;
+                    }
+                    else
+                    {
+                        AutoStyle(_player, BlockStyles.Target);
+                        //_player.Content = "Target";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Target;
+                    }
+
+                    _characterColumn += columnDir;
+                    _characterRow += rowDir;
+
+                    _player = nextBlock;
+                    WinCheck();
 
                     break;
                 case BlockStyles.BoxTarget:
 
+                    PPos = new int[2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
+                    NBPos = new int[2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
+                    ABPos = new int[2] { Grid.GetRow(afterBlock), Grid.GetColumn(afterBlock) };
+
+                    if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Wall || _playGrid[ABPos[0], ABPos[1]] == BlockStyles.Box)
+                    {
+                        break;
+                    }
+
+                    if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Ground)
+                    {
+                        _playGrid[ABPos[0], ABPos[1]] = BlockStyles.Box;
+                        AutoStyle(afterBlock, BlockStyles.Box);
+                    }
+                    else
+                    {
+                        _playGrid[ABPos[0], ABPos[1]] = BlockStyles.BoxTarget;
+                        AutoStyle(afterBlock, BlockStyles.BoxTarget);
+                    }
+                    _activeTargetBlocks--;
+
+                    _playGrid[NBPos[0], NBPos[1]] = BlockStyles.PlayerTarget;
+                    AutoStyle(nextBlock, BlockStyles.PlayerTarget);
+
+
+                    if (_playGrid[PPos[0], PPos[1]] == BlockStyles.Player)
+                    {
+                        AutoStyle(_player, BlockStyles.Ground);
+                        //_player.Content = "Ground";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Ground;
+                    }
+                    else
+                    {
+                        AutoStyle(_player, BlockStyles.Target);
+                        //_player.Content = "Target";
+                        _playGrid[PPos[0], PPos[1]] = BlockStyles.Target;
+                    }
+
+                    _characterColumn += columnDir;
+                    _characterRow += rowDir;
+
+                    _player = nextBlock;
+
+                    
+
                     break;
 
             }
+
+            
 
 
 
@@ -452,9 +600,43 @@ namespace Sokoban2
             //}
         }
 
+
         private void AutoStyle(Blocks blockTarget, BlockStyles blockTarget_style)
         {
             blockTarget.Style = (Style)FindResource(GetStyles(blockTarget_style));
+        }
+
+        
+
+        private void ShowHide_Btn(object sender, RoutedEventArgs e)
+        {
+            if (_gameStage == GameStage.Victory)
+            {
+                _gameStage = GameStage.PlayStage;
+                VictoryGrid.Visibility = Visibility.Hidden;
+                LayoutGrid.Visibility = Visibility.Visible;
+            }
+            else if(_gameStage == GameStage.PlayStage)
+            {
+                _gameStage = GameStage.Victory;
+                VictoryGrid.Visibility = Visibility.Visible;
+                LayoutGrid.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void WinCheck()
+        {
+            if(_targetBlockCount == _activeTargetBlocks)
+            {
+                _gameStage = GameStage.Victory;
+                VictoryGrid.Visibility = Visibility.Visible;
+                LayoutGrid.Visibility = Visibility.Hidden;
+            }
+        }
+
+        private void Reset(object sender, RoutedEventArgs e)
+        {
+            Start();
         }
     }
 }
