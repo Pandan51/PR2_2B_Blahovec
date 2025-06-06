@@ -56,6 +56,7 @@ class Salesman
     public static Salesman DeserializeTree(string jsonString)
     {
         List<SalesmanData> deserializedData = JsonSerializer.Deserialize<List<SalesmanData>>(jsonString);
+        Console.WriteLine(deserializedData);
 
         Dictionary<int, Salesman> treeData = new Dictionary<int, Salesman>();
         Salesman root = null;

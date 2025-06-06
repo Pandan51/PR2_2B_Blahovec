@@ -11,6 +11,8 @@ using System.Windows.Navigation;
 //using System.Windows.Shapes;
 using System.Text.Json;
 using System.IO;
+using System.Windows.Controls.Primitives;
+using System.Diagnostics;
 
 
 namespace Sokoban2
@@ -27,7 +29,7 @@ namespace Sokoban2
 
     
 
-    internal enum GameStage {Victory, PlayStage}
+    internal enum GameStage {Victory, PlayStage, LevelSelect}
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
@@ -61,9 +63,12 @@ namespace Sokoban2
         public MainWindow()
         {
             InitializeComponent();
-            _playGrid = Create2DArray();
+            LoadLevels();
+            _playGrid = ParseLevel(levels[0].grid);
             //_startLayout = _playGrid;
-            Start();
+            CreatePlayfield(_playGrid);
+
+
         }
 
 
@@ -136,8 +141,9 @@ namespace Sokoban2
             //        //}
             //    }
             //}
+            
 
-            CreatePlayfield(_playGrid);
+            
 
 
         }
@@ -315,7 +321,7 @@ namespace Sokoban2
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Target, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
@@ -553,27 +559,49 @@ namespace Sokoban2
             blockTarget.Style = (Style)FindResource(GetStyles(blockTarget_style));
         }
 
-        
+
 
         private void ShowHide_Btn(object sender, RoutedEventArgs e)
         {
-            //if (_gameStage == GameStage.Victory)
-            //{
-            //    _gameStage = GameStage.PlayStage;
-            //    VictoryGrid.Visibility = Visibility.Hidden;
-            //    LayoutGrid.Visibility = Visibility.Visible;
-            //}
-            //else if(_gameStage == GameStage.PlayStage)
-            //{
-            //    _gameStage = GameStage.Victory;
-            //    VictoryGrid.Visibility = Visibility.Visible;
-            //    LayoutGrid.Visibility = Visibility.Hidden;
+            if (_gameStage == GameStage.Victory)
+            {
+                _gameStage = GameStage.PlayStage;
+                VictoryGrid.Visibility = Visibility.Hidden;
+                LayoutGrid.Visibility = Visibility.Visible;
+            }
+            else if (_gameStage == GameStage.PlayStage)
+            {
+                _gameStage = GameStage.Victory;
+                VictoryGrid.Visibility = Visibility.Visible;
+                LayoutGrid.Visibility = Visibility.Hidden;
 
 
+            }
+        }
 
-            //UNDO implementace
-            UndoRollback();
-
+        private void SwitchGameStage(GameStage request)
+        {
+            switch(request)
+            {
+                case GameStage.PlayStage:
+                    _gameStage = GameStage.PlayStage;
+                    VictoryGrid.Visibility = Visibility.Hidden;
+                    LayoutGrid.Visibility = Visibility.Visible;
+                    LevelsGrid.Visibility = Visibility.Hidden;
+                    break;
+                case GameStage.LevelSelect:
+                    _gameStage = GameStage.LevelSelect;
+                    VictoryGrid.Visibility = Visibility.Hidden;
+                    LayoutGrid.Visibility = Visibility.Hidden;
+                    LevelsGrid.Visibility = Visibility.Visible;
+                    break;
+                case GameStage.Victory:
+                    _gameStage = GameStage.Victory;
+                    VictoryGrid.Visibility = Visibility.Visible;
+                    LayoutGrid.Visibility = Visibility.Hidden;
+                    LevelsGrid.Visibility = Visibility.Hidden;
+                    break;
+            }
         }
 
         private void WinCheck()
@@ -589,9 +617,9 @@ namespace Sokoban2
         private void Reset(object sender, RoutedEventArgs e)
         {
 
-            _playGrid = Create2DArray();
-            Start();
-            
+            _playGrid = ParseLevel(levels[0].grid);
+            CreatePlayfield(_playGrid);
+
         }
 
         private void UndoSave(BlockStyles[,] newSave)
@@ -601,16 +629,16 @@ namespace Sokoban2
             _undoArray.Push(tempPush);
         }
 
-        private void UndoRollback()
-        {
-            if (_undoArray.Count > 0)
-            {
+        //private void UndoRollback()
+        //{
+        //    if (_undoArray.Count > 0)
+        //    {
                 
-                _playGrid = _undoArray.Pop();
-                CreatePlayfield(_playGrid);
-            }
+        //        _playGrid = _undoArray.Pop();
+        //        CreatePlayfield(_playGrid);
+        //    }
             
-        }
+        //}
 
         //TODO: Create grid for undo implementation
         private void CreatePlayfield(BlockStyles[,] sentPlayfield)
@@ -618,9 +646,9 @@ namespace Sokoban2
             int targetCount = 0;
             int activeTarget = 0;
             //sloupec
-            arrayXSize = _playGrid.GetLength(1);
+            arrayXSize = _playGrid.GetLength(0);
             //řádek
-            arrayYSize = _playGrid.GetLength(0);
+            arrayYSize = _playGrid.GetLength(1);
 
             //Reference na bloky
             _blocksGrid = new Blocks[arrayYSize, arrayXSize];
@@ -634,7 +662,7 @@ namespace Sokoban2
             //připravím řádky, sloupce
             //Zatím stále,
             //TODO později implementovat velikost
-            for (int i = 0; i < arrayXSize; i++)
+            for (int i = 0; i < arrayYSize; i++)
             {
                 var colDef = new ColumnDefinition();
                 colDef.Width = cellSize;
@@ -644,16 +672,16 @@ namespace Sokoban2
                 PlayingFieldGrid.ColumnDefinitions.Add(colDef);
             }
 
-            for (int i = 0; i < arrayYSize; i++)
+            for (int i = 0; i < arrayXSize; i++)
             {
                 var rowDef = new RowDefinition();
                 rowDef.Height = cellSize;
                 PlayingFieldGrid.RowDefinitions.Add(rowDef);
             }
 
-            for (int i = 0; i < arrayYSize; i++)
+            for (int i = 0; i < arrayXSize; i++)
             {
-                for (int j = 0; j < arrayXSize; j++)
+                for (int j = 0; j < arrayYSize; j++)
                 {
                     //if (i != arrayXSize && j != arrayYSize)
                     //{
@@ -701,14 +729,155 @@ namespace Sokoban2
             {
                 string projectRoot = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
                 string jsonPath = Path.Combine(projectRoot, "Levels.json");
-                List<LevelData> json = JsonSerializer.Deserialize<List<LevelData>>(File.ReadAllText("Levels.json"));
-                levels = json;
+                
+
+                //List<LevelData> json = JsonSerializer.Deserialize<List<LevelData>>();
+                //levels = json;
+                string jsonText = File.ReadAllText(jsonPath);
+                
+
+
+                // Deserialize into a List<LevelData>
+                levels = JsonSerializer.Deserialize<List<LevelData>>(jsonText);
+
+
+                
+
+
+
+
+
+                //foreach(LevelData x in levels)
+                //{
+                //    MessageBox.Show($"You clicked: {x.LevelNumber}");
+                //}
+
+                int totalLevels = levels.Count; // Your total levels
+                int columns = (int)Math.Ceiling(Math.Sqrt(totalLevels)); // Columns ≈ √N (rounded up)
+                int rows = (int)Math.Ceiling((double)totalLevels / columns); // Rows = Total / Columns (rounded up)
+
+                LevelsGrid.Children.Clear();
+                LevelsGrid.ColumnDefinitions.Clear();
+                LevelsGrid.RowDefinitions.Clear();
+
+                for (int i = 0; i<columns;i++)
+                    LevelsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+                for (int i = 0; i < columns; i++)
+                    LevelsGrid.RowDefinitions.Add(new RowDefinition());
+
+               
+
+                //for (int j = 1; j <= rows; j++)
+                //{
+                //    for (int i = 1; i <= columns; i++)
+                //    {
+                //        Button btn = new Button();
+                //        btn.Content = $"{i + (columns * (j - 1))}";
+                //        Grid.SetColumn(btn, i - 1);
+                //        Grid.SetRow(btn, j - 1);
+                //        //btn.Background = ;
+
+                //        LevelsGrid.Children.Add(btn);
+                //    }
+                //}
+                int row = 1;
+                int col = 1;
+                int count = 0;
+                do
+                {
+
+
+                    Button btn = new Button()
+                    {
+                        Tag = levels[count].level
+                    };
+                    btn.Content = $"{col + (columns * (row - 1))}";
+                    Grid.SetColumn(btn, col - 1);
+                    Grid.SetRow(btn, row - 1);
+                    
+
+                    LevelsGrid.Children.Add(btn);
+                    btn.Click += new RoutedEventHandler(LevelBtn_Click);
+                    
+                    LevelsGrid.AddHandler(ButtonBase.ClickEvent, new RoutedEventHandler(LevelBtn_Click));
+                    if (col == columns)
+                    {
+                        row++;
+                        col = 0;
+                    }
+                    col++;
+                    count++;
+
+                }
+                while (count < totalLevels);
+
+
             }
             catch
             {
                 throw new Exception();
             }
         }
+
+        //internal void LoadLevels()
+        //{
+        //    try
+        //    {
+        //        // 1. Get correct path
+        //        string projectRoot = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+        //        string jsonPath = Path.Combine(projectRoot, "Levels.json");
+
+        //        // 2. Read and deserialize JSON properly
+        //        string jsonText = File.ReadAllText(jsonPath);
+        //        levels = JsonSerializer.Deserialize<List<LevelData>>(jsonText);
+
+        //        if (levels == null || levels.Count == 0)
+        //        {
+        //            MessageBox.Show("No levels found in JSON file");
+        //            return;
+        //        }
+
+        //        // 3. Calculate grid layout
+        //        int totalLevels = levels.Count;
+        //        int columns = (int)Math.Ceiling(Math.Sqrt(totalLevels));
+        //        int rows = (int)Math.Ceiling((double)totalLevels / columns);
+
+        //        // 4. Clear previous grid
+        //        LevelsGrid.Children.Clear();
+        //        LevelsGrid.ColumnDefinitions.Clear();
+        //        LevelsGrid.RowDefinitions.Clear();
+
+        //        // 5. Create columns and rows
+        //        for (int i = 0; i < columns; i++)
+        //            LevelsGrid.ColumnDefinitions.Add(new ColumnDefinition());
+        //        for (int i = 0; i < rows; i++)
+        //            LevelsGrid.RowDefinitions.Add(new RowDefinition());
+
+        //        // 6. Create buttons for each level
+        //        for (int index = 0; index < totalLevels; index++)
+        //        {
+        //            int row = index / columns;
+        //            int col = index % columns;
+
+        //            var btn = new Button()
+        //            {
+        //                Content = $"Level {levels[index].LevelNumber}",
+        //                Tag = levels[index], // Store the entire LevelData object
+        //                Margin = new Thickness(5)
+        //            };
+
+        //            Grid.SetRow(btn, row);
+        //            Grid.SetColumn(btn, col);
+        //            btn.Click += LevelBtn_Click; // Single handler
+        //            LevelsGrid.Children.Add(btn);
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show($"Error loading levels: {ex.Message}");
+        //        // Consider creating default levels here if loading fails
+        //    }
+        //}
 
         internal BlockStyles[,] ParseLevel(int[][] grid)
         {
@@ -723,10 +892,45 @@ namespace Sokoban2
                     levelGrid[i, j] = (BlockStyles)grid[i][j];
                 }
             }
+            
             return levelGrid;
         }
 
+        private void Undo_Rollback(object sender, RoutedEventArgs e)
+        {
+            if (_undoArray.Count > 0)
+            {
 
+                _playGrid = _undoArray.Pop();
+                CreatePlayfield(_playGrid);
+            }
+        }
 
+        private void LevelSelection(object sender, RoutedEventArgs e)
+        {
+            _gameStage = GameStage.LevelSelect;
+            VictoryGrid.Visibility = Visibility.Hidden;
+            LayoutGrid.Visibility = Visibility.Hidden;
+            LevelsGrid.Visibility = Visibility.Visible;
+        }
+
+        private void LevelBtn_Click(object sender, RoutedEventArgs e)
+        {
+            if (sender is Button button)
+            {
+                int buttonText = int.Parse(button.Content.ToString());
+                //MessageBox.Show($"You clicked: {buttonText}");
+
+                foreach(LevelData x in levels)
+                {
+                    if(x.level == buttonText)
+                    {
+                        _playGrid = ParseLevel(x.grid);
+                        CreatePlayfield(_playGrid);
+                        SwitchGameStage(GameStage.PlayStage);
+                    }
+                }
+            }
+        }
     }
 }

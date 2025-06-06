@@ -7,6 +7,7 @@
         mc:Ignorable="d"
         x:Name="Map"
         Title="MainWindow" Height="800" Width="800">
+    
 
     <Grid>
         
@@ -51,7 +52,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Button Content="Undo" Grid.Column="0" Grid.Row="0" Click="ShowHide_Btn"/>
+                <Button Content="Undo" Grid.Column="0" Grid.Row="0" Click="Undo_Rollback"/>
             
                 <Button Content="Up" Grid.Column="1" Grid.Row="0" Click="Button_MoveUp"/>
 
@@ -72,7 +73,9 @@
         <Grid x:Name="VictoryGrid" Visibility="Hidden">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
-                
+                <ColumnDefinition/>
+
+
             </Grid.ColumnDefinitions>
 
             <Grid.RowDefinitions>
@@ -80,13 +83,18 @@
                 <RowDefinition/>
             </Grid.RowDefinitions>
 
-            <TextBlock TextAlignment="Center" Grid.Column="0" Grid.Row="0">Type Shit</TextBlock>
+            <TextBlock TextAlignment="Center" Grid.Column="0" Grid.Row="0" Grid.RowSpan="2">Výhra levelu!</TextBlock>
+            
             <Button Content="Hide/Show" Grid.Column="0" Grid.Row="1" Click="ShowHide_Btn"/>
+            <Button Content="Levels" Grid.Column="1" Grid.Row="1" Click="LevelSelection"/>
 
             
         </Grid>
 
-        <Grid x:Name="LevelsGrid" Visibility="Hidden">
+        <Grid x:Name="LevelsGrid" 
+              Visibility="Hidden"
+              
+              >
             
         </Grid>
     </Grid>

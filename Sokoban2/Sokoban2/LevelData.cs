@@ -8,7 +8,7 @@ namespace Sokoban2
 {
     public class LevelData
     {
-        public int LevelNumber { get; set; }
-        public int[][] Grid { get; set; }  // 2D array as nested lists (JSON-friendly)
+        public int level { get; set; }
+        public int[][] grid { get; set; }  // 2D array as nested lists (JSON-friendly)
     }
 }
