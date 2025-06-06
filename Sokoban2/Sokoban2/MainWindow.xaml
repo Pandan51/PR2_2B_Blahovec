@@ -51,7 +51,7 @@
                     <RowDefinition/>
                 </Grid.RowDefinitions>
 
-                <Button Content="Hide/Show" Grid.Column="0" Grid.Row="0" Click="ShowHide_Btn"/>
+                <Button Content="Undo" Grid.Column="0" Grid.Row="0" Click="ShowHide_Btn"/>
             
                 <Button Content="Up" Grid.Column="1" Grid.Row="0" Click="Button_MoveUp"/>
 
@@ -83,6 +83,10 @@
             <TextBlock TextAlignment="Center" Grid.Column="0" Grid.Row="0">Type Shit</TextBlock>
             <Button Content="Hide/Show" Grid.Column="0" Grid.Row="1" Click="ShowHide_Btn"/>
 
+            
+        </Grid>
+
+        <Grid x:Name="LevelsGrid" Visibility="Hidden">
             
         </Grid>
     </Grid>

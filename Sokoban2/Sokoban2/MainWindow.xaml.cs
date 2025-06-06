@@ -8,12 +8,24 @@ using System.Windows.Input.Manipulations;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
-using System.Windows.Shapes;
+//using System.Windows.Shapes;
+using System.Text.Json;
+using System.IO;
+
 
 namespace Sokoban2
 {
-    internal enum BlockStyles { Wall, Ground, Target, Box, BoxTarget, Player, PlayerTarget }
+    internal enum BlockStyles { 
+        Wall=0,
+        Ground=1,
+        Target=2,
+        Box=3,
+        BoxTarget=4,
+        Player=5,
+        PlayerTarget=6 }
     internal enum Direction { Up, Left, Down, Right}
+
+    
 
     internal enum GameStage {Victory, PlayStage}
     /// <summary>
@@ -26,7 +38,9 @@ namespace Sokoban2
         private int arrayYSize = 5;
         //Hráč
         private Blocks _player;
+
         //
+        //private BlockStyles[,] _startLayout;
         private BlockStyles[,] _playGrid;
         private Blocks[,] _blocksGrid;
 
@@ -39,123 +53,95 @@ namespace Sokoban2
         private int _targetBlockCount = 0;
         private int _activeTargetBlocks = 0;
 
+        private Stack<BlockStyles[,]> _undoArray = new Stack<BlockStyles[,]>();
+        //Levels list
+        List<LevelData> levels; /*= JsonSerializer.Deserialize<List<LevelData>>(File.ReadAllText("Levels.json"));*/
 
 
-        
-
-
-
-
-
-
-        //public int _characterColumn
-        //{
-        //    get { return (int)GetValue(_characterColumnProperty); }
-        //    set { SetValue(_characterColumnProperty, value); }
-        //}
-
-        //// Using a DependencyProperty as the backing store for _characterColumn.  This enables animation, styling, binding, etc...
-        //public static readonly DependencyProperty _characterColumnProperty =
-        //    DependencyProperty.Register("_characterColumn", typeof(int), typeof(MainWindow), new PropertyMetadata(2));
-
-
-
-        //Řádek (_characterY)
-
-
-
-        //public int _characterRow
-        //{
-        //    get { return (int)GetValue(_characterRowProperty); }
-        //    set { SetValue(_characterRowProperty, value); }
-        //}
-
-        //// Using a DependencyProperty as the backing store for _characterRow.  This enables animation, styling, binding, etc...
-        //public static readonly DependencyProperty _characterRowProperty =
-        //    DependencyProperty.Register("_characterRow", typeof(int), typeof(MainWindow), new PropertyMetadata(2));
-
-
+        public MainWindow()
+        {
+            InitializeComponent();
+            _playGrid = Create2DArray();
+            //_startLayout = _playGrid;
+            Start();
+        }
 
 
         private void Start()
         {
-            _playGrid = Create2DArray();
-
-            
-
-            //sloupec
-            arrayXSize = _playGrid.GetLength(1);
-            //řádek
-            arrayYSize = _playGrid.GetLength(0);
-
-            //Reference na bloky
-            _blocksGrid = new Blocks[arrayYSize, arrayXSize];
-            //promažu, kdyby tam něco bylo
-
-            PlayingFieldGrid.ColumnDefinitions.Clear();
-            PlayingFieldGrid.RowDefinitions.Clear();
-
-            var cellSize = new System.Windows.GridLength(50);
-
-            //připravím řádky, sloupce
-            //Zatím stále,
-            //TODO později implementovat velikost
-            for (int i = 0; i < arrayXSize; i++)
-            {
-                var colDef = new ColumnDefinition();
-                colDef.Width = cellSize;
-                
 
 
-                PlayingFieldGrid.ColumnDefinitions.Add(colDef);
-            }
+            ////sloupec
+            //arrayXSize = _playGrid.GetLength(1);
+            ////řádek
+            //arrayYSize = _playGrid.GetLength(0);
 
-            for (int i = 0; i < arrayYSize; i++)
-            {
-                var rowDef = new RowDefinition();
-                rowDef.Height = cellSize;
-                PlayingFieldGrid.RowDefinitions.Add(rowDef);
-            }
+            ////Reference na bloky
+            //_blocksGrid = new Blocks[arrayYSize, arrayXSize];
+            ////promažu, kdyby tam něco bylo
 
-            for (int i = 0; i < arrayYSize; i++)
-            {
-                for (int j = 0; j < arrayXSize; j++)
-                {
-                    //if (i != arrayXSize && j != arrayYSize)
-                    //{
-                    Blocks block = new Blocks();
-                    _blocksGrid[j, i] = block;
+            //PlayingFieldGrid.ColumnDefinitions.Clear();
+            //PlayingFieldGrid.RowDefinitions.Clear();
 
-                    block.Style = (Style)FindResource(GetStyles(_playGrid[i, j]));
-                    if(_playGrid[i, j]==BlockStyles.Target)
-                    {
-                        _targetBlockCount++;
-                    }
-                    else if(_playGrid[i, j] == BlockStyles.BoxTarget)
-                    {
-                        _targetBlockCount++;
-                        _activeTargetBlocks++;
-                    }
-                    Grid.SetRow(block, i);
-                    Grid.SetColumn(block, j);
-                    //Test
-                    if (_playGrid[i, j] == BlockStyles.Player)
-                    {
-                        _player = block;
-                        
-                    }
-                    PlayingFieldGrid.Children.Add(block);
-                    //}
-                }
-            }
+            //var cellSize = new System.Windows.GridLength(50);
+
+            ////připravím řádky, sloupce
+            ////Zatím stále,
+            ////TODO později implementovat velikost
+            //for (int i = 0; i < arrayXSize; i++)
+            //{
+            //    var colDef = new ColumnDefinition();
+            //    colDef.Width = cellSize;
+
+
+
+            //    PlayingFieldGrid.ColumnDefinitions.Add(colDef);
+            //}
+
+            //for (int i = 0; i < arrayYSize; i++)
+            //{
+            //    var rowDef = new RowDefinition();
+            //    rowDef.Height = cellSize;
+            //    PlayingFieldGrid.RowDefinitions.Add(rowDef);
+            //}
+
+            //for (int i = 0; i < arrayYSize; i++)
+            //{
+            //    for (int j = 0; j < arrayXSize; j++)
+            //    {
+            //        //if (i != arrayXSize && j != arrayYSize)
+            //        //{
+            //        Blocks block = new Blocks();
+            //        _blocksGrid[j, i] = block;
+
+            //        block.Style = (Style)FindResource(GetStyles(_playGrid[i, j]));
+            //        if (_playGrid[i, j] == BlockStyles.Target)
+            //        {
+            //            _targetBlockCount++;
+            //        }
+            //        else if (_playGrid[i, j] == BlockStyles.BoxTarget)
+            //        {
+            //            _targetBlockCount++;
+            //            _activeTargetBlocks++;
+            //        }
+            //        Grid.SetRow(block, i);
+            //        Grid.SetColumn(block, j);
+            //        //Test
+            //        if (_playGrid[i, j] == BlockStyles.Player)
+            //        {
+            //            _player = block;
+
+            //        }
+            //        PlayingFieldGrid.Children.Add(block);
+            //        //}
+            //    }
+            //}
+
+            CreatePlayfield(_playGrid);
 
 
         }
-        public MainWindow()
-        {
-            InitializeComponent();
-            Start();
-        }
+        
 
         private void Button_MoveUp(object sender, RoutedEventArgs e)
         {
@@ -187,6 +173,40 @@ namespace Sokoban2
             if (_characterColumn < arrayXSize - 1)
             {
                 Move(Direction.Right,1,0);
+            }
+        }
+
+        protected override void OnKeyDown(KeyEventArgs e)
+        {
+            base.OnKeyDown(e);
+
+            switch (e.Key)
+            {
+                case Key.W: // Up
+                   if (_characterRow > 0)
+                    {
+                        Move(Direction.Up, 0,-1);
+                    }
+                    break;
+
+                case Key.S: // Down
+                    if (_characterRow < arrayYSize - 1)
+                    {
+                        Move(Direction.Down, 0, 1);
+                    }
+                    break;
+                case Key.A: // Left
+                    if (_characterColumn > 0)
+                    {
+                        Move(Direction.Left, -1, 0);
+                    }
+                    break;
+                case Key.D: // Right
+                    if (_characterColumn < arrayXSize - 1)
+                    {
+                        Move(Direction.Right, 1, 0);
+                    }
+                    break;
             }
         }
 
@@ -295,10 +315,10 @@ namespace Sokoban2
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Target, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
             { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall }
         };
@@ -314,7 +334,7 @@ namespace Sokoban2
         }
 
         private void Move(Direction direction, int columnDir, int rowDir)
-                {
+        {
 
 
             //Bloky ve směru
@@ -358,8 +378,10 @@ namespace Sokoban2
                 case BlockStyles.Wall:
                     break;
 
-                case BlockStyles.Ground:
 
+
+                case BlockStyles.Ground:
+                    UndoSave(_playGrid);
                     int[] PPos = { Grid.GetRow(_player), Grid.GetColumn(_player) };
                     int[] NBPos = { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
 
@@ -385,10 +407,11 @@ namespace Sokoban2
                     _characterRow += rowDir;
 
                     _player = nextBlock;
+                    //UNDO
                     
-
                     break;
                 case BlockStyles.Target:
+                    UndoSave(_playGrid);
                     PPos = new int [2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
                     NBPos = new int [2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
 
@@ -414,10 +437,11 @@ namespace Sokoban2
                     _characterRow += rowDir;
 
                     _player = nextBlock;
-
-
+                    //UNDO
+                    
                     break;
                 case BlockStyles.Box:
+                    
                     PPos = new int[2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
                     NBPos = new int[2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
                     int[] ABPos = new int[2] {Grid.GetRow(afterBlock), Grid.GetColumn(afterBlock) };
@@ -426,8 +450,9 @@ namespace Sokoban2
                     {
                         break;
                     }
+                    UndoSave(_playGrid);
 
-                    if(_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Ground)
+                    if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Ground)
                     {
                         _playGrid[ABPos[0], ABPos[1]] = BlockStyles.Box;
                         AutoStyle(afterBlock, BlockStyles.Box);
@@ -462,10 +487,12 @@ namespace Sokoban2
 
                     _player = nextBlock;
                     WinCheck();
+                    //UNDO
+                    
 
                     break;
                 case BlockStyles.BoxTarget:
-
+                    UndoSave(_playGrid);
                     PPos = new int[2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
                     NBPos = new int[2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
                     ABPos = new int[2] { Grid.GetRow(afterBlock), Grid.GetColumn(afterBlock) };
@@ -508,96 +535,16 @@ namespace Sokoban2
                     _characterRow += rowDir;
 
                     _player = nextBlock;
-
+                    //UNDO
                     
 
                     break;
 
             }
 
+
+
             
-
-
-
-            //if(direction == Direction.Up)
-            //{
-            //    //Blok ve směru
-            //    Blocks nextBlock = _blocksGrid[_characterColumn, _characterRow - 1];
-
-            //    //Kontrola, jestli blok je zeď
-            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
-            //    {
-
-
-            //        Grid.SetRow(nextBlock, _characterRow);
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
-
-            //        _characterRow--;
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = _player;
-            //        Grid.SetRow(_player, _characterRow);
-
-            //    }
-            //}
-            //else if (direction == Direction.Left)
-            //{
-            //    Blocks nextBlock = _blocksGrid[_characterColumn - 1, _characterRow];
-
-            //    //Kontrola, jestli blok je zeď
-            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
-            //    {
-
-            //        Grid.SetColumn(nextBlock, _characterColumn);
-
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
-
-            //        _characterColumn--;
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = _player;
-
-            //        Grid.SetColumn(_player, _characterColumn);
-
-            //    }
-            //}
-            //else if (direction == Direction.Down)
-            //{
-            //    Blocks nextBlock = _blocksGrid[_characterColumn, _characterRow + 1];
-
-            //    //Kontrola, jestli blok je zeď
-            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
-            //    {
-            //        Grid.SetRow(nextBlock, _characterRow);
-            //        //Change
-            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
-
-            //        _characterRow++;
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = _player;
-            //        Grid.SetRow(_player, _characterRow);
-
-            //    }
-            //}
-            //else if (direction == Direction.Right)
-            //{
-            //    Blocks nextBlock = _blocksGrid[_characterColumn + 1, _characterRow];
-            //    //Kontrola, jestli blok je zeď
-            //    if (nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
-            //    {
-
-            //        Grid.SetColumn(nextBlock, _characterColumn);
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = nextBlock;
-
-            //        _characterColumn++;
-            //        //change
-            //        _blocksGrid[_characterColumn, _characterRow] = _player;
-
-            //        Grid.SetColumn(_player, _characterColumn);
-
-            //    }
-            //}
         }
 
 
@@ -610,18 +557,23 @@ namespace Sokoban2
 
         private void ShowHide_Btn(object sender, RoutedEventArgs e)
         {
-            if (_gameStage == GameStage.Victory)
-            {
-                _gameStage = GameStage.PlayStage;
-                VictoryGrid.Visibility = Visibility.Hidden;
-                LayoutGrid.Visibility = Visibility.Visible;
-            }
-            else if(_gameStage == GameStage.PlayStage)
-            {
-                _gameStage = GameStage.Victory;
-                VictoryGrid.Visibility = Visibility.Visible;
-                LayoutGrid.Visibility = Visibility.Hidden;
-            }
+            //if (_gameStage == GameStage.Victory)
+            //{
+            //    _gameStage = GameStage.PlayStage;
+            //    VictoryGrid.Visibility = Visibility.Hidden;
+            //    LayoutGrid.Visibility = Visibility.Visible;
+            //}
+            //else if(_gameStage == GameStage.PlayStage)
+            //{
+            //    _gameStage = GameStage.Victory;
+            //    VictoryGrid.Visibility = Visibility.Visible;
+            //    LayoutGrid.Visibility = Visibility.Hidden;
+
+
+
+            //UNDO implementace
+            UndoRollback();
+
         }
 
         private void WinCheck()
@@ -636,7 +588,145 @@ namespace Sokoban2
 
         private void Reset(object sender, RoutedEventArgs e)
         {
+
+            _playGrid = Create2DArray();
             Start();
+            
         }
+
+        private void UndoSave(BlockStyles[,] newSave)
+        {
+            BlockStyles[,] tempPush = new BlockStyles[newSave.GetLength(0), newSave.GetLength(1)];
+            Array.Copy(newSave, tempPush, newSave.Length);
+            _undoArray.Push(tempPush);
+        }
+
+        private void UndoRollback()
+        {
+            if (_undoArray.Count > 0)
+            {
+                
+                _playGrid = _undoArray.Pop();
+                CreatePlayfield(_playGrid);
+            }
+            
+        }
+
+        //TODO: Create grid for undo implementation
+        private void CreatePlayfield(BlockStyles[,] sentPlayfield)
+        {
+            int targetCount = 0;
+            int activeTarget = 0;
+            //sloupec
+            arrayXSize = _playGrid.GetLength(1);
+            //řádek
+            arrayYSize = _playGrid.GetLength(0);
+
+            //Reference na bloky
+            _blocksGrid = new Blocks[arrayYSize, arrayXSize];
+            //promažu, kdyby tam něco bylo
+
+            PlayingFieldGrid.ColumnDefinitions.Clear();
+            PlayingFieldGrid.RowDefinitions.Clear();
+
+            var cellSize = new System.Windows.GridLength(50);
+
+            //připravím řádky, sloupce
+            //Zatím stále,
+            //TODO později implementovat velikost
+            for (int i = 0; i < arrayXSize; i++)
+            {
+                var colDef = new ColumnDefinition();
+                colDef.Width = cellSize;
+
+
+
+                PlayingFieldGrid.ColumnDefinitions.Add(colDef);
+            }
+
+            for (int i = 0; i < arrayYSize; i++)
+            {
+                var rowDef = new RowDefinition();
+                rowDef.Height = cellSize;
+                PlayingFieldGrid.RowDefinitions.Add(rowDef);
+            }
+
+            for (int i = 0; i < arrayYSize; i++)
+            {
+                for (int j = 0; j < arrayXSize; j++)
+                {
+                    //if (i != arrayXSize && j != arrayYSize)
+                    //{
+                    Blocks block = new Blocks();
+                    _blocksGrid[j, i] = block;
+
+                    block.Style = (Style)FindResource(GetStyles(sentPlayfield[i, j]));
+                    if(sentPlayfield[i, j]==BlockStyles.Player)
+                    {
+                        _characterColumn = j;
+                        _characterRow = i;
+                    }
+
+                    if (sentPlayfield[i, j] == BlockStyles.Target || sentPlayfield[i, j] == BlockStyles.BoxTarget)
+                    {
+                        targetCount++;
+                        
+                    }
+                    else if (sentPlayfield[i, j] == BlockStyles.BoxTarget)
+                    {
+                        targetCount++;
+                        activeTarget++;
+                    }
+                    Grid.SetRow(block, i);
+                    Grid.SetColumn(block, j);
+                    //Test
+                    if (sentPlayfield[i, j] == BlockStyles.Player)
+                    {
+                        _player = block;
+
+                    }
+                    PlayingFieldGrid.Children.Add(block);
+                    //}
+                }
+            }
+
+            _targetBlockCount = targetCount;
+            _activeTargetBlocks = activeTarget;
+
+        }
+
+        internal void LoadLevels()
+        {
+            try
+            {
+                string projectRoot = Directory.GetParent(Directory.GetCurrentDirectory()).Parent.Parent.FullName;
+                string jsonPath = Path.Combine(projectRoot, "Levels.json");
+                List<LevelData> json = JsonSerializer.Deserialize<List<LevelData>>(File.ReadAllText("Levels.json"));
+                levels = json;
+            }
+            catch
+            {
+                throw new Exception();
+            }
+        }
+
+        internal BlockStyles[,] ParseLevel(int[][] grid)
+        {
+            int rows = grid.Length;
+            int cols = grid[0].Length;
+            BlockStyles[,] levelGrid = new BlockStyles[rows, cols];
+
+            for (int i = 0; i < rows; i++)
+            {
+                for (int j = 0; j < cols; j++)
+                {
+                    levelGrid[i, j] = (BlockStyles)grid[i][j];
+                }
+            }
+            return levelGrid;
+        }
+
+
+
     }
 }
