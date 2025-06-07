@@ -30,33 +30,35 @@ namespace Sokoban2
     
 
     internal enum GameStage {Victory, PlayStage, LevelSelect}
-    /// <summary>
-    /// Interaction logic for MainWindow.xaml
-    /// </summary>
+    
     public partial class MainWindow : Window
     {
         //Velikosti 2d polí
-        private int arrayXSize_column = 5;
-        private int arrayYSize_row = 5;
-        //Hráč
-        private Blocks _player;
-
-        //
-        //private BlockStyles[,] _startLayout;
+        //Grid
+        private int arrayXSize_column;
+        private int arrayYSize_row;
         private BlockStyles[,] _playGrid;
         private Blocks[,] _blocksGrid;
 
-        //Sloupec (_characterX)
-
+        //Hráč
+        private Blocks _player;
         private int _characterColumn = 2;
         private int _characterRow = 2;
-        private GameStage _gameStage = GameStage.PlayStage;
 
+        //Výhra
         private int _targetBlockCount = 0;
         private int _activeTargetBlocks = 0;
 
+
+        //Undo
         private BlockStyles[,] _startPos;
         private Stack<BlockStyles[,]> _undoArray = new Stack<BlockStyles[,]>();
+
+
+        //game stage
+        private GameStage _gameStage = GameStage.PlayStage;
+
+
         //Levels list
         List<LevelData> levels;
 
@@ -82,7 +84,8 @@ namespace Sokoban2
 
                 switch (e.Key)
                 {
-                    case Key.W: // Up
+                    case Key.W:
+                    
                         if (_characterRow > 0)
                         {
                             Move(0, -1);
@@ -335,41 +338,42 @@ namespace Sokoban2
             }
         }
 
-        #region MoveButtons 
+        //#region MoveButtons 
 
-        private void Button_MoveUp(object sender, RoutedEventArgs e)
-        {
-            if (_characterRow > 0)
-            {
-                Move(0, -1);
-            }
+        //private void Button_MoveUp(object sender, RoutedEventArgs e)
+        //{
+        //    if (_characterRow > 0)
+        //    {
+        //        Move(0, -1);
+        //    }
 
-        }
+        //}
 
-        private void Button_MoveLeft(object sender, RoutedEventArgs e)
-        {
-            if (_characterColumn > 0)
-            {
-                Move(-1, 0);
-            }
-        }
+        //private void Button_MoveLeft(object sender, RoutedEventArgs e)
+        //{
+        //    if (_characterColumn > 0)
+        //    {
+        //        Move(-1, 0);
+        //    }
+        //}
 
-        private void Button_MoveDown(object sender, RoutedEventArgs e)
-        {
-            if (_characterRow < arrayYSize_row - 1)
-            {
-                Move(0, 1);
-            }
-        }
+        //private void Button_MoveDown(object sender, RoutedEventArgs e)
+        //{
+        //    if (_characterRow < arrayYSize_row - 1)
+        //    {
+        //        Move(0, 1);
+        //    }
+        //}
 
-        private void Button_MoveRight(object sender, RoutedEventArgs e)
-        {
-            if (_characterColumn < arrayXSize_column - 1)
-            {
-                Move(1, 0);
-            }
-        }
-        #endregion
+        //private void Button_MoveRight(object sender, RoutedEventArgs e)
+        //{
+        //    if (_characterColumn < arrayXSize_column - 1)
+        //    {
+        //        Move(1, 0);
+        //    }
+        //}
+        //#endregion
+
         private void Reset(object sender, RoutedEventArgs e)
         {
 
@@ -399,6 +403,7 @@ namespace Sokoban2
             Array.Copy(newSave, tempPush, newSave.Length);
             _undoArray.Push(tempPush);
         }
+        
         #endregion
 
 
@@ -430,26 +435,7 @@ namespace Sokoban2
         {
             blockTarget.Style = (Style)FindResource(GetStyles(blockTarget_style));
         }
-        #endregion
 
-        #region Levels
-        private void ShowHide_Btn(object sender, RoutedEventArgs e)
-        {
-            if (_gameStage == GameStage.Victory)
-            {
-                _gameStage = GameStage.PlayStage;
-                VictoryGrid.Visibility = Visibility.Hidden;
-                LayoutGrid.Visibility = Visibility.Visible;
-            }
-            else if (_gameStage == GameStage.PlayStage)
-            {
-                _gameStage = GameStage.Victory;
-                VictoryGrid.Visibility = Visibility.Visible;
-                LayoutGrid.Visibility = Visibility.Hidden;
-
-
-            }
-        }
         private void CreatePlayfield(BlockStyles[,] sentPlayfield)
         {
 
@@ -533,6 +519,27 @@ namespace Sokoban2
             _activeTargetBlocks = activeTarget;
 
         }
+        #endregion
+
+        #region Levels
+        //private void ShowHide_Btn(object sender, RoutedEventArgs e)
+        //{
+        //    if (_gameStage == GameStage.Victory)
+        //    {
+        //        _gameStage = GameStage.PlayStage;
+        //        VictoryGrid.Visibility = Visibility.Hidden;
+        //        LayoutGrid.Visibility = Visibility.Visible;
+        //    }
+        //    else if (_gameStage == GameStage.PlayStage)
+        //    {
+        //        _gameStage = GameStage.Victory;
+        //        VictoryGrid.Visibility = Visibility.Visible;
+        //        LayoutGrid.Visibility = Visibility.Hidden;
+
+
+        //    }
+        //}
+
         internal void LoadLevels()
         {
             try
@@ -688,46 +695,46 @@ namespace Sokoban2
 
             return levelGrid;
         }
-        private BlockStyles[,] Custom2DArray(int size)
-        {
+        //private BlockStyles[,] Custom2DArray(int size)
+        //{
 
-            if (size == 5)
-            {
-                BlockStyles[,] grid = new BlockStyles[5, 5]
-                {
-                { BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall },
-            { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall }
-        };
-                return grid;
-            }
-            else if (size == 10)
-            {
-                BlockStyles[,] grid = new BlockStyles[10, 10]
-               {
-                { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
-            { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall }
-        };
-                return grid;
-            }
-            else
-            {
-                return null;
-            }
+        //    if (size == 5)
+        //    {
+        //        BlockStyles[,] grid = new BlockStyles[5, 5]
+        //        {
+        //        { BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall },
+        //    { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall,  BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall,  BlockStyles.Wall }
+        //};
+        //        return grid;
+        //    }
+        //    else if (size == 10)
+        //    {
+        //        BlockStyles[,] grid = new BlockStyles[10, 10]
+        //       {
+        //        { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Target, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Player, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Box, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Ground, BlockStyles.Wall },
+        //    { BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall, BlockStyles.Wall }
+        //};
+        //        return grid;
+        //    }
+        //    else
+        //    {
+        //        return null;
+        //    }
 
 
 
-        }
+        //}
         private void SwitchGameStage(GameStage request)
         {
             switch (request)
