@@ -25,7 +25,7 @@ namespace Sokoban2
         BoxTarget=4,
         Player=5,
         PlayerTarget=6 }
-    internal enum Direction { Up, Left, Down, Right}
+    
 
     
 
@@ -58,7 +58,7 @@ namespace Sokoban2
         private BlockStyles[,] _startPos;
         private Stack<BlockStyles[,]> _undoArray = new Stack<BlockStyles[,]>();
         //Levels list
-        List<LevelData> levels; /*= JsonSerializer.Deserialize<List<LevelData>>(File.ReadAllText("Levels.json"));*/
+        List<LevelData> levels;
 
 
         public MainWindow()
@@ -154,7 +154,7 @@ namespace Sokoban2
         {
             if (_characterRow > 0)
             {
-                Move(Direction.Up, 0,-1);
+                Move(0,-1);
             }
 
         }
@@ -163,7 +163,7 @@ namespace Sokoban2
         {
             if (_characterColumn > 0)
             {
-                Move(Direction.Left, -1,0);
+                Move(-1,0);
             }
         }
 
@@ -171,7 +171,7 @@ namespace Sokoban2
         {
             if (_characterRow < arrayYSize_row - 1)
             {
-                Move(Direction.Down,0,1);
+                Move(0,1);
             }
         }
 
@@ -179,7 +179,7 @@ namespace Sokoban2
         {
             if (_characterColumn < arrayXSize_column - 1)
             {
-                Move(Direction.Right,1,0);
+                Move(1,0);
             }
         }
 
@@ -192,26 +192,26 @@ namespace Sokoban2
                 case Key.W: // Up
                    if (_characterRow > 0)
                     {
-                        Move(Direction.Up, 0,-1);
+                        Move(0,-1);
                     }
                     break;
 
                 case Key.S: // Down
                     if (_characterRow < arrayYSize_row - 1)
                     {
-                        Move(Direction.Down, 0, 1);
+                        Move(0, 1);
                     }
                     break;
                 case Key.A: // Left
                     if (_characterColumn > 0)
                     {
-                        Move(Direction.Left, -1, 0);
+                        Move(-1, 0);
                     }
                     break;
                 case Key.D: // Right
                     if (_characterColumn < arrayXSize_column - 1)
                     {
-                        Move(Direction.Right, 1, 0);
+                        Move(1, 0);
                     }
                     break;
             }
@@ -340,7 +340,7 @@ namespace Sokoban2
             
         }
 
-        private void Move(Direction direction, int columnDir, int rowDir)
+        private void Move(int columnDir, int rowDir)
         {
 
 
