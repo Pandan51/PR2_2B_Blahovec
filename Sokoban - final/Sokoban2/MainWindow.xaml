@@ -12,7 +12,9 @@
     <Grid>
         
     
-        <Grid x:Name="LayoutGrid">
+        <Grid x:Name="LayoutGrid"
+              Visibility="Hidden"
+              >
 
             <Grid.ColumnDefinitions>
                 <ColumnDefinition/>
@@ -92,7 +94,7 @@
         </Grid>
 
         <Grid x:Name="LevelsGrid" 
-              Visibility="Hidden"
+              Visibility="Visible"
               
               >
             

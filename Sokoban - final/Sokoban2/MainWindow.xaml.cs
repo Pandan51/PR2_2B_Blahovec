@@ -36,8 +36,8 @@ namespace Sokoban2
     public partial class MainWindow : Window
     {
         //Velikosti 2d polí
-        private int arrayXSize = 5;
-        private int arrayYSize = 5;
+        private int arrayXSize_column = 5;
+        private int arrayYSize_row = 5;
         //Hráč
         private Blocks _player;
 
@@ -55,6 +55,7 @@ namespace Sokoban2
         private int _targetBlockCount = 0;
         private int _activeTargetBlocks = 0;
 
+        private BlockStyles[,] _startPos;
         private Stack<BlockStyles[,]> _undoArray = new Stack<BlockStyles[,]>();
         //Levels list
         List<LevelData> levels; /*= JsonSerializer.Deserialize<List<LevelData>>(File.ReadAllText("Levels.json"));*/
@@ -64,9 +65,9 @@ namespace Sokoban2
         {
             InitializeComponent();
             LoadLevels();
-            _playGrid = ParseLevel(levels[0].grid);
-            //_startLayout = _playGrid;
-            CreatePlayfield(_playGrid);
+            //_playGrid = ParseLevel(levels[0].grid);
+            ////_startLayout = _playGrid;
+            //CreatePlayfield(_playGrid);
 
 
         }
@@ -168,7 +169,7 @@ namespace Sokoban2
 
         private void Button_MoveDown(object sender, RoutedEventArgs e)
         {
-            if (_characterRow < arrayYSize - 1)
+            if (_characterRow < arrayYSize_row - 1)
             {
                 Move(Direction.Down,0,1);
             }
@@ -176,7 +177,7 @@ namespace Sokoban2
 
         private void Button_MoveRight(object sender, RoutedEventArgs e)
         {
-            if (_characterColumn < arrayXSize - 1)
+            if (_characterColumn < arrayXSize_column - 1)
             {
                 Move(Direction.Right,1,0);
             }
@@ -196,7 +197,7 @@ namespace Sokoban2
                     break;
 
                 case Key.S: // Down
-                    if (_characterRow < arrayYSize - 1)
+                    if (_characterRow < arrayYSize_row - 1)
                     {
                         Move(Direction.Down, 0, 1);
                     }
@@ -208,7 +209,7 @@ namespace Sokoban2
                     }
                     break;
                 case Key.D: // Right
-                    if (_characterColumn < arrayXSize - 1)
+                    if (_characterColumn < arrayXSize_column - 1)
                     {
                         Move(Direction.Right, 1, 0);
                     }
@@ -244,7 +245,7 @@ namespace Sokoban2
         //TODO - implement scaling
         private BlockStyles[,] Create2DArray()
         {
-            BlockStyles[,] grid = new BlockStyles[arrayXSize, arrayYSize];
+            BlockStyles[,] grid = new BlockStyles[arrayYSize_row, arrayXSize_column];
             Random rand = new Random();
 
             //// First fill the grid with random "W" or "G"
@@ -345,11 +346,11 @@ namespace Sokoban2
 
             //Bloky ve směru
             //nextBlock je vedle hráče
-            Blocks nextBlock = _blocksGrid[_characterColumn + columnDir, _characterRow + (rowDir)];
+            Blocks nextBlock = _blocksGrid[_characterRow + (rowDir), _characterColumn + columnDir];
             Blocks afterBlock = new();
             //afterBlock je za nextBlock
             if(nextBlock.Style != (Style)FindResource(GetStyles(BlockStyles.Wall)))
-                 afterBlock = _blocksGrid[_characterColumn + (2 * columnDir), _characterRow + (2 * rowDir)];
+                 afterBlock = _blocksGrid[_characterRow + (2 * rowDir), _characterColumn + (2 * columnDir)];
 
             
             
@@ -394,6 +395,7 @@ namespace Sokoban2
                     AutoStyle(nextBlock, BlockStyles.Player);
                     _playGrid[NBPos[0], NBPos[1]] = BlockStyles.Player;
 
+                    
                     if (_playGrid[PPos[0], PPos[1]] == BlockStyles.Player)
                     {
                         AutoStyle(_player, BlockStyles.Ground);
@@ -498,27 +500,28 @@ namespace Sokoban2
 
                     break;
                 case BlockStyles.BoxTarget:
-                    UndoSave(_playGrid);
+                    
                     PPos = new int[2] { Grid.GetRow(_player), Grid.GetColumn(_player) };
                     NBPos = new int[2] { Grid.GetRow(nextBlock), Grid.GetColumn(nextBlock) };
                     ABPos = new int[2] { Grid.GetRow(afterBlock), Grid.GetColumn(afterBlock) };
 
-                    if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Wall || _playGrid[ABPos[0], ABPos[1]] == BlockStyles.Box)
+                    if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Wall || _playGrid[ABPos[0], ABPos[1]] == BlockStyles.Box || _playGrid[ABPos[0], ABPos[1]] == BlockStyles.BoxTarget)
                     {
                         break;
                     }
-
+                    UndoSave(_playGrid);
                     if (_playGrid[ABPos[0], ABPos[1]] == BlockStyles.Ground)
                     {
                         _playGrid[ABPos[0], ABPos[1]] = BlockStyles.Box;
                         AutoStyle(afterBlock, BlockStyles.Box);
+                        _activeTargetBlocks--;
                     }
                     else
                     {
                         _playGrid[ABPos[0], ABPos[1]] = BlockStyles.BoxTarget;
                         AutoStyle(afterBlock, BlockStyles.BoxTarget);
                     }
-                    _activeTargetBlocks--;
+                    
 
                     _playGrid[NBPos[0], NBPos[1]] = BlockStyles.PlayerTarget;
                     AutoStyle(nextBlock, BlockStyles.PlayerTarget);
@@ -617,8 +620,15 @@ namespace Sokoban2
         private void Reset(object sender, RoutedEventArgs e)
         {
 
-            _playGrid = ParseLevel(levels[0].grid);
+            //_playGrid = ParseLevel(levels[0].grid);
+            //_playGrid = _startPos;
+
+            Array.Copy(_startPos, _playGrid, _startPos.Length);
+            _undoArray.Clear();
             CreatePlayfield(_playGrid);
+            
+            
+            
 
         }
 
@@ -643,15 +653,16 @@ namespace Sokoban2
         //TODO: Create grid for undo implementation
         private void CreatePlayfield(BlockStyles[,] sentPlayfield)
         {
+            
             int targetCount = 0;
             int activeTarget = 0;
             //sloupec
-            arrayXSize = _playGrid.GetLength(0);
+            arrayXSize_column = _playGrid.GetLength(1);
             //řádek
-            arrayYSize = _playGrid.GetLength(1);
+            arrayYSize_row = _playGrid.GetLength(0);
 
             //Reference na bloky
-            _blocksGrid = new Blocks[arrayYSize, arrayXSize];
+            _blocksGrid = new Blocks[arrayYSize_row, arrayXSize_column];
             //promažu, kdyby tam něco bylo
 
             PlayingFieldGrid.ColumnDefinitions.Clear();
@@ -662,7 +673,7 @@ namespace Sokoban2
             //připravím řádky, sloupce
             //Zatím stále,
             //TODO později implementovat velikost
-            for (int i = 0; i < arrayYSize; i++)
+            for (int i = 0; i < arrayXSize_column; i++)
             {
                 var colDef = new ColumnDefinition();
                 colDef.Width = cellSize;
@@ -672,30 +683,31 @@ namespace Sokoban2
                 PlayingFieldGrid.ColumnDefinitions.Add(colDef);
             }
 
-            for (int i = 0; i < arrayXSize; i++)
+            for (int i = 0; i < arrayYSize_row; i++)
             {
                 var rowDef = new RowDefinition();
                 rowDef.Height = cellSize;
                 PlayingFieldGrid.RowDefinitions.Add(rowDef);
             }
 
-            for (int i = 0; i < arrayXSize; i++)
+            for (int i = 0; i < arrayYSize_row; i++)
             {
-                for (int j = 0; j < arrayYSize; j++)
+                for (int j = 0; j < arrayXSize_column; j++)
                 {
                     //if (i != arrayXSize && j != arrayYSize)
                     //{
                     Blocks block = new Blocks();
-                    _blocksGrid[j, i] = block;
+                    _blocksGrid[i, j] = block;
 
                     block.Style = (Style)FindResource(GetStyles(sentPlayfield[i, j]));
-                    if(sentPlayfield[i, j]==BlockStyles.Player)
+                    if(sentPlayfield[i, j]==BlockStyles.Player || sentPlayfield[i, j] == BlockStyles.PlayerTarget)
                     {
                         _characterColumn = j;
                         _characterRow = i;
+                        _player = block;
                     }
 
-                    if (sentPlayfield[i, j] == BlockStyles.Target || sentPlayfield[i, j] == BlockStyles.BoxTarget)
+                    if (sentPlayfield[i, j] == BlockStyles.Target || sentPlayfield[i, j] == BlockStyles.PlayerTarget)
                     {
                         targetCount++;
                         
@@ -912,6 +924,7 @@ namespace Sokoban2
             VictoryGrid.Visibility = Visibility.Hidden;
             LayoutGrid.Visibility = Visibility.Hidden;
             LevelsGrid.Visibility = Visibility.Visible;
+            _undoArray.Clear();
         }
 
         private void LevelBtn_Click(object sender, RoutedEventArgs e)
@@ -925,7 +938,10 @@ namespace Sokoban2
                 {
                     if(x.level == buttonText)
                     {
+
                         _playGrid = ParseLevel(x.grid);
+                        _startPos = new BlockStyles[_playGrid.GetLength(0), _playGrid.GetLength(1)];
+                        Array.Copy(_playGrid, _startPos, _playGrid.Length);
                         CreatePlayfield(_playGrid);
                         SwitchGameStage(GameStage.PlayStage);
                     }
